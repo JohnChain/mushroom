@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from head import *
+from arm_frame_solution import ArmFrameSolution
+from task_list import global_task_list
+from task_list import task_condition
+
+class TaskDeliver():
+    """
+    处理任务队列中的任务，向底层发送任务
+    """
+    def __init__(self, ):
+        pass
+
+    def core(self, stopEvent, param, ):
+        """
+        :param param: 未用
+        :rtype: 0
+        """
+
+        log_msg = '[Task Deliver ] Thread task delivery is ready ...'
+        log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+
+        print log_msg
+        if task_condition.acquire():
+            while not stopEvent.isSet():
+                key_list = global_task_list.task_list.keys()
+                if  len(key_list) > 0:
+                    # TODO: comment or let it go
+                    for key in key_list:
+                        try:
+                            one_task = global_task_list.task_list[key]
+                            if one_task.state == TASK_READY:
+                                sender = ArmFrameSolution()
+                                sender.send(arm_client_list[1].handler, one_task.frame)
+                                one_task.state = TASK_WAITING
+
+                                log_msg = '[ Task Deliver ] Send one task id : %d' %(one_task.id)
+                                log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+
+                            elif one_task.state == TASK_WAITING:
+                                now_time = datetime.now()
+                                gap = (now_time - one_task.birth_time).seconds
+                                if gap > TASK_TIMEOUT:
+                                    global_task_list.remove(key)
+                            else:
+                                global_task_list.remove(key)
+                        except NameError:
+                            continue
+                        except IndexError:
+                            continue
+                else:
+                    task_condition.wait(TASK_WAIT_CIRCLE)
+            task_condition.release()
+        else:
+            print '!!!!!!!!!!! task_condition not acquired'
+
+        log_msg = '[ Task Deliver ] Task Deliver shutdown and cleaned! '
+        log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+
+        print log_msg
+        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        exit()
