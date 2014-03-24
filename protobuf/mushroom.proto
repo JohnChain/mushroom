@@ -1,14 +1,38 @@
 message MessageHeader
 {
     required int32 message_id = 1;
-    optional int32 session 	  = 2;
-    optional int32 type       = 3;
+    optional int32 session = 2;
+    optional TYPE type     = 3;
 
-    optional int32 version    = 4;
+    enum TYPE {
+	REQUEST = 1;
+	RESPONSE = 2;
+    }
+
+    optional int32 version = 4;
     optional int32 connection = 5;
-    optional int32 source     = 6;
+    optional int32 source = 6;
 }
 
+
+enum SENSOR_TYPE {
+	TEMP = 1;
+	LIGHT = 2;
+	HUMI = 3;
+	CO2 = 4;
+}
+
+enum CONTROLLER_TYPE {
+	XUNHUAN_FAN   = 1;
+	JINFENG_FAN   = 2;
+	PAIFENG_FAN   = 3;
+	JIASHIQI      = 4;
+	YASUOJI       = 5;
+	NEIJI         = 6;
+	YELLOW_LIGHT  = 7;
+	RED_LIGHT     = 8;
+	BLUE_LIGHT    = 9;
+}
 
 enum MESSAGE_ID {
 	// System Config 1-1000
@@ -36,23 +60,19 @@ enum MESSAGE_ID {
 	SENSOR_DATA_PUSH = 2003;
 	
 	// extension 3001-4000
+	PING = 3001;
+	
+	INIT = 3002;
 }
  
 message Room {
 	required int32 room_id = 1;
 }
-
-enum SENSOR_TYPE {
-	TEMP = 1;
-	LIGHT = 2;
-	HUMI = 3;
-	CO2 = 4;
-};
-
+ 
 message Sensor {
 	required int32 id = 1;
-	required SENSOR_TYPE type = 2;
-	required int32 value = 3;
+	optional SENSOR_TYPE type = 2;
+	optional int32 value = 3;
 }
  
 message SynTime {
@@ -60,7 +80,8 @@ message SynTime {
 }
 
 enum RESPONSE {
-	OK = 1;	
+	OK = 0;
+	ERROR = -1;	
 }
  
 message ResponseCode {
@@ -80,15 +101,35 @@ message ConfigList {
 message Controller {
 	required int32 controller_id = 1;
 	enum STATE {
-		OPEN = 1;
-		CLOSE = 2;
-		ERROR = 3;
+		CLOSE = 0;
+		OPEN =  1;
+		ERROR = -1;
 	}
 	optional STATE state = 2;
+	optional CONTROLLER_TYPE type = 3;
 }
  
 message SensorData {
-    required Room room = 1;
+    required int32 room_id = 1;
     repeated Sensor sensor = 2;
     required SynTime time = 3;
+}
+
+message Ping {
+	required string src = 1;
+	required int32 byte_num = 2;
+	required int32 icmp_req = 3;
+	required int32 ttl = 4;
+	required int32 time = 5;
+}
+
+message RoomConf {
+	required int32 id = 1;
+	repeated Sensor sensor = 2;
+	repeated Controller controller = 3;
+}
+
+message Init {
+	repeated RoomConf roomconf = 1;
+	repeated Config   config = 2;	
 }

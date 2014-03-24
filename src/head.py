@@ -13,6 +13,31 @@ from threading import Event, Timer
 from signal import signal, SIGINT
 from binascii import a2b_hex, b2a_hex
 
+from mushroom_pb2 import *
+sensor_type_dict = {
+               TEMP : 'temperature',
+               LIGHT: 'light',
+               HUMI : 'humidity',
+               CO2  : 'co2',
+               }
+
+controller_type_dict = {
+                   XUNHUAN_FAN  : 'xunhuan_fan',
+                   JINFENG_FAN  : 'jinfeng_fan',
+                   PAIFENG_FAN  : 'paifeng_fan',
+                   JIASHIQI     : 'jiashiqi',
+                   YASUOJI      : 'yasuoji',
+                   NEIJI        : 'neiji',
+                   YELLOW_LIGHT : 'yello_light',
+                   RED_LIGHT    : 'red_light',
+                   BLUE_LIGHT   : 'blue_light',
+                   }
+
+sys_config_dict = {
+              'TIME_SYNC_CYCLE' : 50,
+              
+              }
+
 SUC = 0
 FAI = -1
 ERR = -2
@@ -46,17 +71,18 @@ TASK_FINISHED = 2
 MAX_TASK_ID = 99999
 # 任务线程条件变量等待周期
 TASK_WAIT_CIRCLE = 1
+
 #============套接字队列模块配置=============#
 #: select 超时时间
 SELECT_TIMEOUT = 2
 #: 僵尸套接字连接判断时间
 SOCKET_TIMEOUT = 10
 #: 对 ARM 提供链接服务的地址及端口
-ARM_SERVER_ADDR = ('127.0.0.1', 10001)
-#ARM_SERVER_ADDR = ('10.18.50.66', 9000)
+# ARM_SERVER_ADDR = ('127.0.0.1', 10001)
+ARM_SERVER_ADDR = ('10.18.50.66', 9000)
 #: 对 Django 提供链接服务的地址及端口 
-DJANGO_SERVER_ADDR = ('127.0.0.1', 10002)
-#DJANGO_SERVER_ADDR = ('10.18.50.66', 9001)
+# DJANGO_SERVER_ADDR = ('127.0.0.1', 10002)
+DJANGO_SERVER_ADDR = ('10.18.50.66', 9001)
 
 #: 方向，本系统中包括 ARM 和 Django
 # from mesgtype_pb2 import *
@@ -122,6 +148,9 @@ D_VERSION = 1
 D_version_byte = 1
 #: 业务层消息头占字节数
 D_lenght_byte = 4
+
+ON = 1
+OFF = 0
 
 #: 控制命令取值
 ctrl_cmd = {

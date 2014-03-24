@@ -204,6 +204,48 @@ class MssqlConnection:
                     continue
         self.close()
         print "Translate to Absolute Time Done!"
+    
+    
+    def insert_sensor(self, sensor_id, sensor_type, room_id, position = '', state = ON):
+        """
+        插入传感器信息
+        
+        :param sensor_id: 传感器ID 整型
+        :param sensor_type: 传感器类型 字符串
+        :param room_id: 房间ID 整型
+        :param position: 传感器位置 
+        :param state: 传感器当前状态
+        :rtype: SUC 成功， FAI 失败， ERR 异常
+        """
+        sql_str = '''insert into tb_sensor(sensor_id, sensor_type, room_id, position, state) 
+                    values(%d, '%s', %d, '%s', %d)''' %(sensor_id, sensor_type, room_id, position, state)
+        try:
+            self.connect()
+            self.executeDML(sql_str)
+            self.close()
+        except Exception:
+            return FAI
+        return SUC
+    
+    def insert_controller(self, controller_id, controller_type, room_id, state = ON):
+        """
+        插入控制器信息
+        
+        :param controller_id: 控制器ID
+        :param controller_type: 控制器类型 字符串
+        :param room_id: 房间ID
+        :param state: 传感器当前状态
+        :rtype: SUC 成功， FAI 失败， ERR 异常
+        """
+        sql_str = '''insert into tb_controller(controller_id, controller_type, room_id, state) 
+                    values(%d, '%s', %d, %d)''' %(controller_id, controller_type, room_id, state)
+        try:
+            self.connect()
+            self.executeDML(sql_str)
+            self.close()
+        except Exception:
+            return FAI
+        return SUC
         
     def insert_data(self, room_id, sense_time, temperature, humidity, co2, light, \
                     temperature_id = -1, humidity_id = -1, co2_id = -1, light_id = -1):

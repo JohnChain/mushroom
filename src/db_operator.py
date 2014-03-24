@@ -219,7 +219,7 @@ class DbOperator(MssqlConnection):
         self.connect()
         temp_list = self.queryAll(sql_str)
         self.close()
-        current_policy = []       
+        current_policy = []
         for i in temp_list:
             temp = {}
             temp['changeTime']        = i[0].strftime('%Y/%m/%d %H:%M:%S')

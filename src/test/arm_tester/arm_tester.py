@@ -13,6 +13,8 @@ def main():
     print 'connection done...'
 
     receiver = ArmFrameMain(arm_tester)
+    arm_tester.send(init())
+    arm_tester.send(read_time())
     while 1:
         receiver.main_receivor()
 

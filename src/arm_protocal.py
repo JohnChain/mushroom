@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from head import *
 from utils import *
 from task_list import *
@@ -69,6 +70,7 @@ def deal_update_time_response(proto_inst, fileno):
         pass
     
 #===================================================================================
+
 def deal_read_conf(proto_inst, fileno):
     """
     处理来自ARM的配置读取请求
@@ -110,46 +112,8 @@ def deal_update_conf_response(proto_inst, fileno):
     else:
         print "update time failed, error log : %s" %response_code.log
 
-def reboot(fileno):
-    """
-    重启控制系统
-    
-    :fileno: 当前套接字通信的连接句柄
-    :rtype: 【待定】
-    """
-    one_task = Task()
-    
-    version = A_VERSION
-    type    = 1
-    message_header = gene_message_header(REBOOT, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
-    main_frame = gene_arm_frame(data = '', message_header = message_header)
-    
-    generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
-    
-def deal_reboot_response(proto_inst, fileno):
-    """
-    处理来自ARM的重启响应
-    
-    :param proto_inst: 半proto实例，header部分已反序列化，body部分未被反序列化
-    :fileno: 当前套接字通信的连接句柄
-    :rtype: 【待定】
-    """
-    response_code = ResponseCode()
-    response_code.ParseFromString(proto_inst['data'])
-    header_inst = proto_inst['header_inst']
-    if header_inst.source == BIRTH_TYPE_AUTO:
-        if response_code.code == OK:
-            print "update time succeed"
-        else:
-            print "update time failed, error log : %s" %response_code.log
-    else:
-        #TODO: 后期前台可以添加功能
-        if response_code.code == OK:
-            print "update time succeed"
-        else:
-            print "update time failed, error log : %s" %response_code.log
-        
 # ===================================================================================
+
 def read_controller_state(controller_id, fileno):
     """
     查看控制状态
@@ -268,7 +232,9 @@ def deal_update_controller_state_response(proto_inst, fileno):
         message_to_dj = gene_django_frame(head, version, json_inst)
         dj_handler.handler.send(message_to_dj)
         return 1
+    
 # ===================================================================================
+
 def read_sensor_data(room_id, fileno):
     one_task = Task()
     
@@ -286,7 +252,8 @@ def deal_read_sensor_data_response(proto_inst, fileno):
     sensor_data = SensorData()
     sensor_data.ParseFromString(proto_inst['data'])
     
-    room_id = sensor_data.room.room_id
+#     room_id = sensor_data.room.room_id
+    room_id = sensor_data.room_id
     sensor_time = sensor_data.time.timestamp
     data = {}
     for one_data in sensor_data.sensor:
@@ -324,9 +291,83 @@ def deal_sensor_data_push(proto_inst, fileno):
 
 # ===================================================================================
 
+def init_sync(proto_inst, fileno):
+    """
+    系统初始化，信息同步
+    
+    :param proto_inst: 半proto实例，header部分已反序列化，body部分未被反序列化
+    :fileno: 当前套接字通信的连接句柄
+    :rtype: 【待定】
+    """
+    conf_init = Init()
+    conf_init.ParseFromString(proto_inst['data'])
+    
+    db_inst = MssqlConnection()
+    
+    for one_room in conf_init.roomconf:
+        room_id = one_room.id
+        for one_sensor in one_room.sensor:
+            sensor_id = one_sensor.id
+            sensor_type = sensor_type_dict[one_sensor.type]
+            
+            db_inst.insert_sensor(sensor_id, sensor_type, room_id)  
+            
+        for one_controller in one_room.controller:
+            controller_id = one_controller.controller_id
+            controller_type = controller_type_dict[one_controller.type]
+            
+            db_inst.insert_controller(controller_id, controller_type, room_id)
+            
+    for one_config in conf_init.config:
+        key = one_config.key
+        val = one_config.val
+        
+        sys_config_dict[key] = val
+        print 'Here in init_sync key: %s value: %d' %(key, sys_config_dict[key])
+
+def reboot(fileno):
+    """
+    重启控制系统
+    
+    :fileno: 当前套接字通信的连接句柄
+    :rtype: 【待定】
+    """
+    one_task = Task()
+    
+    version = A_VERSION
+    type    = 1
+    message_header = gene_message_header(REBOOT, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
+    main_frame = gene_arm_frame(data = '', message_header = message_header)
+    
+    generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
+    
+def deal_reboot_response(proto_inst, fileno):
+    """
+    处理来自ARM的重启响应
+    
+    :param proto_inst: 半proto实例，header部分已反序列化，body部分未被反序列化
+    :fileno: 当前套接字通信的连接句柄
+    :rtype: 【待定】
+    """
+    response_code = ResponseCode()
+    response_code.ParseFromString(proto_inst['data'])
+    header_inst = proto_inst['header_inst']
+    if header_inst.source == BIRTH_TYPE_AUTO:
+        if response_code.code == OK:
+            print "update time succeed"
+        else:
+            print "update time failed, error log : %s" %response_code.log
+    else:
+        #TODO: 后期前台可以添加功能
+        if response_code.code == OK:
+            print "update time succeed"
+        else:
+            print "update time failed, error log : %s" %response_code.log
+          
+# ===================================================================================
+
 arm_protocal = {
     READ_TIME : deal_read_time,
-#     READ_TIME_RESPONSE : deal_read_time_response,
     UPDATE_TIME : update_time,
     UPDATE_TIME_RESPONSE : deal_update_time_response,
 
@@ -346,4 +387,6 @@ arm_protocal = {
     READ_SENSOR_DATA_RESPONSE : deal_read_sensor_data_response,
 #     SENSOR_DATA_PUSH: deal_sensor_data_push,
     SENSOR_DATA_PUSH: deal_read_sensor_data_response,
+    
+    INIT : init_sync,
 }

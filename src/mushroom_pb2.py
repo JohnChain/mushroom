@@ -14,8 +14,88 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='mushroom.proto',
   package='',
-  serialized_pb='\n\x0emushroom.proto\"w\n\rMessageHeader\x12\x12\n\nmessage_id\x18\x01 \x02(\x05\x12\x0f\n\x07session\x18\x02 \x01(\x05\x12\x0c\n\x04type\x18\x03 \x01(\x05\x12\x0f\n\x07version\x18\x04 \x01(\x05\x12\x12\n\nconnection\x18\x05 \x01(\x05\x12\x0e\n\x06source\x18\x06 \x01(\x05\"\x17\n\x04Room\x12\x0f\n\x07room_id\x18\x01 \x02(\x05\"?\n\x06Sensor\x12\n\n\x02id\x18\x01 \x02(\x05\x12\x1a\n\x04type\x18\x02 \x02(\x0e\x32\x0c.SENSOR_TYPE\x12\r\n\x05value\x18\x03 \x02(\x05\"\x1c\n\x07SynTime\x12\x11\n\ttimestamp\x18\x01 \x02(\t\"4\n\x0cResponseCode\x12\x17\n\x04\x63ode\x18\x01 \x02(\x0e\x32\t.RESPONSE\x12\x0b\n\x03log\x18\x02 \x01(\t\"\"\n\x06\x43onfig\x12\x0b\n\x03key\x18\x01 \x02(\t\x12\x0b\n\x03val\x18\x02 \x01(\x05\"%\n\nConfigList\x12\x17\n\x06\x63onfig\x18\x01 \x03(\x0b\x32\x07.Config\"n\n\nController\x12\x15\n\rcontroller_id\x18\x01 \x02(\x05\x12 \n\x05state\x18\x02 \x01(\x0e\x32\x11.Controller.STATE\"\'\n\x05STATE\x12\x08\n\x04OPEN\x10\x01\x12\t\n\x05\x43LOSE\x10\x02\x12\t\n\x05\x45RROR\x10\x03\"R\n\nSensorData\x12\x13\n\x04room\x18\x01 \x02(\x0b\x32\x05.Room\x12\x17\n\x06sensor\x18\x02 \x03(\x0b\x32\x07.Sensor\x12\x16\n\x04time\x18\x03 \x02(\x0b\x32\x08.SynTime*\xa5\x03\n\nMESSAGE_ID\x12\r\n\tREAD_TIME\x10\x01\x12\x16\n\x12READ_TIME_RESPONSE\x10\x02\x12\x0f\n\x0bUPDATE_TIME\x10\x03\x12\x18\n\x14UPDATE_TIME_RESPONSE\x10\x04\x12\r\n\tREAD_CONF\x10\x05\x12\x16\n\x12READ_CONF_RESPONSE\x10\x06\x12\x0f\n\x0bUPDATE_CONF\x10\x07\x12\x18\n\x14UPDATE_CONF_RESPONSE\x10\x08\x12\n\n\x06REBOOT\x10\t\x12\x13\n\x0fREBOOT_RESPONSE\x10\n\x12\x1a\n\x15READ_CONTROLLER_STATE\x10\xe9\x07\x12#\n\x1eREAD_CONTROLLER_STATE_RESPONSE\x10\xea\x07\x12\x1c\n\x17UPDATE_CONTROLLER_STATE\x10\xeb\x07\x12%\n UPDATE_CONTROLLER_STATE_RESPONSE\x10\xec\x07\x12\x15\n\x10READ_SENSOR_DATA\x10\xd1\x0f\x12\x1e\n\x19READ_SENSOR_DATA_RESPONSE\x10\xd2\x0f\x12\x15\n\x10SENSOR_DATA_PUSH\x10\xd3\x0f*5\n\x0bSENSOR_TYPE\x12\x08\n\x04TEMP\x10\x01\x12\t\n\x05LIGHT\x10\x02\x12\x08\n\x04HUMI\x10\x03\x12\x07\n\x03\x43O2\x10\x04*\x12\n\x08RESPONSE\x12\x06\n\x02OK\x10\x01')
+  serialized_pb='\n\x0emushroom.proto\"\xaf\x01\n\rMessageHeader\x12\x12\n\nmessage_id\x18\x01 \x02(\x05\x12\x0f\n\x07session\x18\x02 \x01(\x05\x12!\n\x04type\x18\x03 \x01(\x0e\x32\x13.MessageHeader.TYPE\x12\x0f\n\x07version\x18\x04 \x01(\x05\x12\x12\n\nconnection\x18\x05 \x01(\x05\x12\x0e\n\x06source\x18\x06 \x01(\x05\"!\n\x04TYPE\x12\x0b\n\x07REQUEST\x10\x01\x12\x0c\n\x08RESPONSE\x10\x02\"\x17\n\x04Room\x12\x0f\n\x07room_id\x18\x01 \x02(\x05\"?\n\x06Sensor\x12\n\n\x02id\x18\x01 \x02(\x05\x12\x1a\n\x04type\x18\x02 \x01(\x0e\x32\x0c.SENSOR_TYPE\x12\r\n\x05value\x18\x03 \x01(\x05\"\x1c\n\x07SynTime\x12\x11\n\ttimestamp\x18\x01 \x02(\t\"4\n\x0cResponseCode\x12\x17\n\x04\x63ode\x18\x01 \x02(\x0e\x32\t.RESPONSE\x12\x0b\n\x03log\x18\x02 \x01(\t\"\"\n\x06\x43onfig\x12\x0b\n\x03key\x18\x01 \x02(\t\x12\x0b\n\x03val\x18\x02 \x01(\x05\"%\n\nConfigList\x12\x17\n\x06\x63onfig\x18\x01 \x03(\x0b\x32\x07.Config\"\x97\x01\n\nController\x12\x15\n\rcontroller_id\x18\x01 \x02(\x05\x12 \n\x05state\x18\x02 \x01(\x0e\x32\x11.Controller.STATE\x12\x1e\n\x04type\x18\x03 \x01(\x0e\x32\x10.CONTROLLER_TYPE\"0\n\x05STATE\x12\t\n\x05\x43LOSE\x10\x00\x12\x08\n\x04OPEN\x10\x01\x12\x12\n\x05\x45RROR\x10\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01\"N\n\nSensorData\x12\x0f\n\x07room_id\x18\x01 \x02(\x05\x12\x17\n\x06sensor\x18\x02 \x03(\x0b\x32\x07.Sensor\x12\x16\n\x04time\x18\x03 \x02(\x0b\x32\x08.SynTime\"R\n\x04Ping\x12\x0b\n\x03src\x18\x01 \x02(\t\x12\x10\n\x08\x62yte_num\x18\x02 \x02(\x05\x12\x10\n\x08icmp_req\x18\x03 \x02(\x05\x12\x0b\n\x03ttl\x18\x04 \x02(\x05\x12\x0c\n\x04time\x18\x05 \x02(\x05\"P\n\x08RoomConf\x12\n\n\x02id\x18\x01 \x02(\x05\x12\x17\n\x06sensor\x18\x02 \x03(\x0b\x32\x07.Sensor\x12\x1f\n\ncontroller\x18\x03 \x03(\x0b\x32\x0b.Controller\"<\n\x04Init\x12\x1b\n\x08roomconf\x18\x01 \x03(\x0b\x32\t.RoomConf\x12\x17\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x07.Config*5\n\x0bSENSOR_TYPE\x12\x08\n\x04TEMP\x10\x01\x12\t\n\x05LIGHT\x10\x02\x12\x08\n\x04HUMI\x10\x03\x12\x07\n\x03\x43O2\x10\x04*\x9b\x01\n\x0f\x43ONTROLLER_TYPE\x12\x0f\n\x0bXUNHUAN_FAN\x10\x01\x12\x0f\n\x0bJINFENG_FAN\x10\x02\x12\x0f\n\x0bPAIFENG_FAN\x10\x03\x12\x0c\n\x08JIASHIQI\x10\x04\x12\x0b\n\x07YASUOJI\x10\x05\x12\t\n\x05NEIJI\x10\x06\x12\x10\n\x0cYELLOW_LIGHT\x10\x07\x12\r\n\tRED_LIGHT\x10\x08\x12\x0e\n\nBLUE_LIGHT\x10\t*\xbb\x03\n\nMESSAGE_ID\x12\r\n\tREAD_TIME\x10\x01\x12\x16\n\x12READ_TIME_RESPONSE\x10\x02\x12\x0f\n\x0bUPDATE_TIME\x10\x03\x12\x18\n\x14UPDATE_TIME_RESPONSE\x10\x04\x12\r\n\tREAD_CONF\x10\x05\x12\x16\n\x12READ_CONF_RESPONSE\x10\x06\x12\x0f\n\x0bUPDATE_CONF\x10\x07\x12\x18\n\x14UPDATE_CONF_RESPONSE\x10\x08\x12\n\n\x06REBOOT\x10\t\x12\x13\n\x0fREBOOT_RESPONSE\x10\n\x12\x1a\n\x15READ_CONTROLLER_STATE\x10\xe9\x07\x12#\n\x1eREAD_CONTROLLER_STATE_RESPONSE\x10\xea\x07\x12\x1c\n\x17UPDATE_CONTROLLER_STATE\x10\xeb\x07\x12%\n UPDATE_CONTROLLER_STATE_RESPONSE\x10\xec\x07\x12\x15\n\x10READ_SENSOR_DATA\x10\xd1\x0f\x12\x1e\n\x19READ_SENSOR_DATA_RESPONSE\x10\xd2\x0f\x12\x15\n\x10SENSOR_DATA_PUSH\x10\xd3\x0f\x12\t\n\x04PING\x10\xb9\x17\x12\t\n\x04INIT\x10\xba\x17*&\n\x08RESPONSE\x12\x06\n\x02OK\x10\x00\x12\x12\n\x05\x45RROR\x10\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01')
 
+_SENSOR_TYPE = _descriptor.EnumDescriptor(
+  name='SENSOR_TYPE',
+  full_name='SENSOR_TYPE',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='TEMP', index=0, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='LIGHT', index=1, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='HUMI', index=2, number=3,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CO2', index=3, number=4,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=907,
+  serialized_end=960,
+)
+
+SENSOR_TYPE = enum_type_wrapper.EnumTypeWrapper(_SENSOR_TYPE)
+_CONTROLLER_TYPE = _descriptor.EnumDescriptor(
+  name='CONTROLLER_TYPE',
+  full_name='CONTROLLER_TYPE',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='XUNHUAN_FAN', index=0, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='JINFENG_FAN', index=1, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PAIFENG_FAN', index=2, number=3,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='JIASHIQI', index=3, number=4,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='YASUOJI', index=4, number=5,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NEIJI', index=5, number=6,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='YELLOW_LIGHT', index=6, number=7,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='RED_LIGHT', index=7, number=8,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='BLUE_LIGHT', index=8, number=9,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=963,
+  serialized_end=1118,
+)
+
+CONTROLLER_TYPE = enum_type_wrapper.EnumTypeWrapper(_CONTROLLER_TYPE)
 _MESSAGE_ID = _descriptor.EnumDescriptor(
   name='MESSAGE_ID',
   full_name='MESSAGE_ID',
@@ -90,44 +170,22 @@ _MESSAGE_ID = _descriptor.EnumDescriptor(
       name='SENSOR_DATA_PUSH', index=16, number=2003,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PING', index=17, number=3001,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='INIT', index=18, number=3002,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=585,
-  serialized_end=1006,
+  serialized_start=1121,
+  serialized_end=1564,
 )
 
 MESSAGE_ID = enum_type_wrapper.EnumTypeWrapper(_MESSAGE_ID)
-_SENSOR_TYPE = _descriptor.EnumDescriptor(
-  name='SENSOR_TYPE',
-  full_name='SENSOR_TYPE',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='TEMP', index=0, number=1,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='LIGHT', index=1, number=2,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='HUMI', index=2, number=3,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='CO2', index=3, number=4,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=1008,
-  serialized_end=1061,
-)
-
-SENSOR_TYPE = enum_type_wrapper.EnumTypeWrapper(_SENSOR_TYPE)
 _RESPONSE = _descriptor.EnumDescriptor(
   name='RESPONSE',
   full_name='RESPONSE',
@@ -135,17 +193,34 @@ _RESPONSE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='OK', index=0, number=1,
+      name='OK', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ERROR', index=1, number=-1,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1063,
-  serialized_end=1081,
+  serialized_start=1566,
+  serialized_end=1604,
 )
 
 RESPONSE = enum_type_wrapper.EnumTypeWrapper(_RESPONSE)
+TEMP = 1
+LIGHT = 2
+HUMI = 3
+CO2 = 4
+XUNHUAN_FAN = 1
+JINFENG_FAN = 2
+PAIFENG_FAN = 3
+JIASHIQI = 4
+YASUOJI = 5
+NEIJI = 6
+YELLOW_LIGHT = 7
+RED_LIGHT = 8
+BLUE_LIGHT = 9
 READ_TIME = 1
 READ_TIME_RESPONSE = 2
 UPDATE_TIME = 3
@@ -163,12 +238,32 @@ UPDATE_CONTROLLER_STATE_RESPONSE = 1004
 READ_SENSOR_DATA = 2001
 READ_SENSOR_DATA_RESPONSE = 2002
 SENSOR_DATA_PUSH = 2003
-TEMP = 1
-LIGHT = 2
-HUMI = 3
-CO2 = 4
-OK = 1
+PING = 3001
+INIT = 3002
+OK = 0
+ERROR = -1
 
+
+_MESSAGEHEADER_TYPE = _descriptor.EnumDescriptor(
+  name='TYPE',
+  full_name='MessageHeader.TYPE',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='REQUEST', index=0, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='RESPONSE', index=1, number=2,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=161,
+  serialized_end=194,
+)
 
 _CONTROLLER_STATE = _descriptor.EnumDescriptor(
   name='STATE',
@@ -177,22 +272,22 @@ _CONTROLLER_STATE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='OPEN', index=0, number=1,
+      name='CLOSE', index=0, number=0,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLOSE', index=1, number=2,
+      name='OPEN', index=1, number=1,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='ERROR', index=2, number=3,
+      name='ERROR', index=2, number=-1,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=459,
-  serialized_end=498,
+  serialized_start=549,
+  serialized_end=597,
 )
 
 
@@ -219,8 +314,8 @@ _MESSAGEHEADER = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='type', full_name='MessageHeader.type', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      number=3, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=1,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -250,12 +345,13 @@ _MESSAGEHEADER = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
+    _MESSAGEHEADER_TYPE,
   ],
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=18,
-  serialized_end=137,
+  serialized_start=19,
+  serialized_end=194,
 )
 
 
@@ -282,8 +378,8 @@ _ROOM = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=139,
-  serialized_end=162,
+  serialized_start=196,
+  serialized_end=219,
 )
 
 
@@ -303,14 +399,14 @@ _SENSOR = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='type', full_name='Sensor.type', index=1,
-      number=2, type=14, cpp_type=8, label=2,
+      number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=1,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='value', full_name='Sensor.value', index=2,
-      number=3, type=5, cpp_type=1, label=2,
+      number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -324,8 +420,8 @@ _SENSOR = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=164,
-  serialized_end=227,
+  serialized_start=221,
+  serialized_end=284,
 )
 
 
@@ -352,8 +448,8 @@ _SYNTIME = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=229,
-  serialized_end=257,
+  serialized_start=286,
+  serialized_end=314,
 )
 
 
@@ -367,7 +463,7 @@ _RESPONSECODE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='code', full_name='ResponseCode.code', index=0,
       number=1, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -387,8 +483,8 @@ _RESPONSECODE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=259,
-  serialized_end=311,
+  serialized_start=316,
+  serialized_end=368,
 )
 
 
@@ -422,8 +518,8 @@ _CONFIG = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=313,
-  serialized_end=347,
+  serialized_start=370,
+  serialized_end=404,
 )
 
 
@@ -450,8 +546,8 @@ _CONFIGLIST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=349,
-  serialized_end=386,
+  serialized_start=406,
+  serialized_end=443,
 )
 
 
@@ -472,6 +568,13 @@ _CONTROLLER = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='state', full_name='Controller.state', index=1,
       number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='Controller.type', index=2,
+      number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=1,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -486,8 +589,8 @@ _CONTROLLER = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=388,
-  serialized_end=498,
+  serialized_start=446,
+  serialized_end=597,
 )
 
 
@@ -499,9 +602,9 @@ _SENSORDATA = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='room', full_name='SensorData.room', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
+      name='room_id', full_name='SensorData.room_id', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -528,18 +631,157 @@ _SENSORDATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=500,
-  serialized_end=582,
+  serialized_start=599,
+  serialized_end=677,
 )
 
+
+_PING = _descriptor.Descriptor(
+  name='Ping',
+  full_name='Ping',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='src', full_name='Ping.src', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='byte_num', full_name='Ping.byte_num', index=1,
+      number=2, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='icmp_req', full_name='Ping.icmp_req', index=2,
+      number=3, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='ttl', full_name='Ping.ttl', index=3,
+      number=4, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='time', full_name='Ping.time', index=4,
+      number=5, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=679,
+  serialized_end=761,
+)
+
+
+_ROOMCONF = _descriptor.Descriptor(
+  name='RoomConf',
+  full_name='RoomConf',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='RoomConf.id', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='sensor', full_name='RoomConf.sensor', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='controller', full_name='RoomConf.controller', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=763,
+  serialized_end=843,
+)
+
+
+_INIT = _descriptor.Descriptor(
+  name='Init',
+  full_name='Init',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='roomconf', full_name='Init.roomconf', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='config', full_name='Init.config', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=845,
+  serialized_end=905,
+)
+
+_MESSAGEHEADER.fields_by_name['type'].enum_type = _MESSAGEHEADER_TYPE
+_MESSAGEHEADER_TYPE.containing_type = _MESSAGEHEADER;
 _SENSOR.fields_by_name['type'].enum_type = _SENSOR_TYPE
 _RESPONSECODE.fields_by_name['code'].enum_type = _RESPONSE
 _CONFIGLIST.fields_by_name['config'].message_type = _CONFIG
 _CONTROLLER.fields_by_name['state'].enum_type = _CONTROLLER_STATE
+_CONTROLLER.fields_by_name['type'].enum_type = _CONTROLLER_TYPE
 _CONTROLLER_STATE.containing_type = _CONTROLLER;
-_SENSORDATA.fields_by_name['room'].message_type = _ROOM
 _SENSORDATA.fields_by_name['sensor'].message_type = _SENSOR
 _SENSORDATA.fields_by_name['time'].message_type = _SYNTIME
+_ROOMCONF.fields_by_name['sensor'].message_type = _SENSOR
+_ROOMCONF.fields_by_name['controller'].message_type = _CONTROLLER
+_INIT.fields_by_name['roomconf'].message_type = _ROOMCONF
+_INIT.fields_by_name['config'].message_type = _CONFIG
 DESCRIPTOR.message_types_by_name['MessageHeader'] = _MESSAGEHEADER
 DESCRIPTOR.message_types_by_name['Room'] = _ROOM
 DESCRIPTOR.message_types_by_name['Sensor'] = _SENSOR
@@ -549,6 +791,9 @@ DESCRIPTOR.message_types_by_name['Config'] = _CONFIG
 DESCRIPTOR.message_types_by_name['ConfigList'] = _CONFIGLIST
 DESCRIPTOR.message_types_by_name['Controller'] = _CONTROLLER
 DESCRIPTOR.message_types_by_name['SensorData'] = _SENSORDATA
+DESCRIPTOR.message_types_by_name['Ping'] = _PING
+DESCRIPTOR.message_types_by_name['RoomConf'] = _ROOMCONF
+DESCRIPTOR.message_types_by_name['Init'] = _INIT
 
 class MessageHeader(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType
@@ -603,6 +848,24 @@ class SensorData(_message.Message):
   DESCRIPTOR = _SENSORDATA
 
   # @@protoc_insertion_point(class_scope:SensorData)
+
+class Ping(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _PING
+
+  # @@protoc_insertion_point(class_scope:Ping)
+
+class RoomConf(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _ROOMCONF
+
+  # @@protoc_insertion_point(class_scope:RoomConf)
+
+class Init(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _INIT
+
+  # @@protoc_insertion_point(class_scope:Init)
 
 
 # @@protoc_insertion_point(module_scope)

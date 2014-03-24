@@ -1,0 +1,4 @@
+[2014-03-23 11:5951] [Level = ERROR] [ThreadName = f1 Thread] [ThreadID = 6972] -- here in f1
+[2014-03-23 11:5951] [Level = ERROR] [ThreadName = f2 Thread] [ThreadID = 2852] -- here in f2
+[2014-03-23 11:5953] [Level = ERROR] [ThreadName = f1 Thread] [ThreadID = 6972] -- here in f1
+[2014-03-23 11:5953] [Level = ERROR] [ThreadName = f2 Thread] [ThreadID = 2852] -- here in f2
