@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from head import *
 from mushroom_pb2 import *
-from arm_protocal import arm_protocal
+from arm_protocal import body_dict
 
 class ArmFrameSolution():
     """
@@ -85,8 +85,10 @@ class ArmFrameSolution():
                 'message_header' : message_header,
                 'data'           : data,
                 }
-        log_msg = 'Receive From ARM: pkg_len = %d    header_len = %d    header = %s    data = %s ' %(pkg_len, header_len, message_header, data) 
-        log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+        log_msg = 'From ARM: pkg_len = %d    header_len = %d    header = %s    data = %s ' %(pkg_len, header_len, message_header, data) 
+        log_handler.communication(log_msg)
+        # log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+        
         return temp_dict
     
     def parse(self, protobuf_msg_dic):
@@ -99,11 +101,6 @@ class ArmFrameSolution():
 
         return proto_inst
     
-    
-    body_dict = {
-                 1: arm_protocal ,
-                 }
-    
     def dispatch(self, proto_inst, birth_fileno):
         """
         解析器
@@ -113,4 +110,4 @@ class ArmFrameSolution():
         """
         message_id = proto_inst['header_inst'].message_id
         version = proto_inst['header_inst'].version
-        return self.body_dict[version][message_id](proto_inst, birth_fileno)
+        return body_dict[version][message_id](proto_inst, birth_fileno)

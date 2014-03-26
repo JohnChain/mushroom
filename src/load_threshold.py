@@ -12,8 +12,9 @@ def load_threshold(stopEvent, param, ):
     :param stopEven:
     :rtype:
     """
-    msg = 'Thread Load Threshold is ready ...'
-    log_manager.add_work_log(msg, sys._getframe().f_code.co_name)
+    log_msg = 'Thread Load Threshold is Ready ...'
+    log_handler.work(log_msg)
+#     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
     db_inst = MssqlConnection()
     db_inst.connect()
@@ -59,9 +60,9 @@ def load_threshold(stopEvent, param, ):
     timer.cancel()
 
     log_msg = 'Load Threshold Thread shutdown and cleaned! '
-    log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+    log_handler.work(log_msg)
+#     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
-    print log_msg
     print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
 
     exit()

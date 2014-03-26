@@ -15,6 +15,11 @@ def deal_read_time(proto_inst, fileno):
     :fileno: 当前套接字通信的连接句柄
     :rtype: 【待定】
     """
+    header  = proto_inst['header_inst']
+    data    = proto_inst['data']
+    log_msg = 'From ARM READ_TIME -- '
+    log_handler.communication(log_msg)
+
     one_task = Task()
     
     data = SynTime()
@@ -26,8 +31,16 @@ def deal_read_time(proto_inst, fileno):
     main_frame = gene_arm_frame(data = data, message_header = message_header)
     
     generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
-    print '\n here in task_list' , fileno, one_task.frame, one_task.birth_type, '<<<<<<<'
-    print "length of task_list is %d" %len(global_task_list.task_list)
+    
+    # log_msg = 'To ARM READ_TIME_RESPONSE -- taskID: %d, connection: %d, source: %d, version: %d, time: %s'\
+                                        # %(one_task.id, fileno, one_task.birth_type, version, data.timestamp)
+    log_msg = 'To ARM READ_TIME_RESPONSE -- %s' %b2a_hex(main_frame)
+    log_handler.communication(log_msg)
+
+    log_msg = "length of task_list is %d" %len(global_task_list.task_list)
+    log_handler.debug(log_msg)
+
+    return SUC
 
 def update_time(proto_inst, fileno):
     """
@@ -44,11 +57,20 @@ def update_time(proto_inst, fileno):
     
     version = A_VERSION
     type    = 1
-    message_header = gene_message_header(UPDATE_TIME_RESPONSE, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
+    message_header = gene_message_header(UPDATE_TIME, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
+
+    log_msg = 'To ARM UPDATE_TIME -- taskID: %d, connection: %d, source: %d, version: %d, time: %s'\
+                                %(one_task.id, fileno, one_task.birth_type, version, data.timestamp)
+    log_handler.communication(log_msg)
+
+
     main_frame = gene_arm_frame(data = data, message_header = message_header)
     
+    log_msg = 'To ARM UPDATE_TIME -- %s' %b2a_hex(main_frame)
+    log_handler.communication(log_msg)
+
     generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
-    
+
 def deal_update_time_response(proto_inst, fileno):
     """
     处理来自ARM的时间更新响应
@@ -60,15 +82,24 @@ def deal_update_time_response(proto_inst, fileno):
     response_code = ResponseCode()
     response_code.ParseFromString(proto_inst['data'])
     header_inst = proto_inst['header_inst']
+
+    log_msg = 'From ARM UPDATE_TIME_RESPONSE -- '
+    log_handler.communication(log_msg)
+
     #TODO: 这里将分析header内的birth_type和fileno,发向相应的套接字
+    result = SUC
     if header_inst.source == BIRTH_TYPE_AUTO:
         if response_code.code == OK:
-            print "update time succeed"
+            log_msg = "From ARM UPDATE_TIME_RESPONSE -- update time succeed"
         else:
-            print "update time failed, error log : %s" %response_code.log
+            log_msg = "From ARM UPDATE_TIME_RESPONSE -- update time failed, error log : %s" %response_code.log
+            result = FAI
     else:
-        pass
+        result = ERR
     
+    log_handler.communication(log_msg)
+    return result
+
 #===================================================================================
 
 def deal_read_conf(proto_inst, fileno):
@@ -132,6 +163,9 @@ def read_controller_state(controller_id, fileno):
     message_header = gene_message_header(READ_CONTROLLER_STATE, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
     main_frame = gene_arm_frame(data = data, message_header = message_header)
     
+    log_msg = 'To ARM READ_CONTROLLER_STATE -- %s' %b2a_hex(main_frame)
+    log_handler.communication(log_msg)
+
     generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
 
 def deal_read_controller_state_response(proto_inst, fileno):
@@ -145,6 +179,10 @@ def deal_read_controller_state_response(proto_inst, fileno):
     proto_data = Controller()
     proto_data.ParseFromString(proto_inst['data'])
     header_inst = proto_inst['header_inst']
+
+    log_msg = 'From ARM READ_CONTROLLER_STATE_RESPONSE -- '
+    log_handler.communication(log_msg)
+
     #TODO: 这里将分析header内的birth_type和fileno,发向相应的套接字
     if header_inst.source == BIRTH_TYPE_AUTO:
         db_inst = DbOperator()
@@ -165,6 +203,10 @@ def deal_read_controller_state_response(proto_inst, fileno):
         version = D_VERSION  #TODO:版本统一 
         message_to_dj = gene_django_frame(head, version, json_inst)
         dj_node.handler.send(message_to_dj)
+
+        log_msg = 'To django view device response -- head: %s, version: %d, data: %s' %(head, version, json.dumps(json_inst))
+        log_handler.communication(log_msg)
+
         return 1
         
 def update_controller_state(controller_id, state, fileno):
@@ -187,6 +229,11 @@ def update_controller_state(controller_id, state, fileno):
     message_header = gene_message_header(UPDATE_CONTROLLER_STATE, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
     main_frame = gene_arm_frame(data = data, message_header = message_header)
     
+    log_msg = 'To ARM UPDATE_CONTROLLER_STATE -- %s' %b2a_hex(main_frame)
+    log_msg = 'To ARM UPDATE_CONTROLLER_STATE -- taskID: %d, connection: %d, source: %d version: %d, controller_id: %d, state: %d' \
+                                                            %(one_task.id, fileno, BIRTH_TYPE_AUTO, version, controller_id, state)
+    log_handler.communication(log_msg)
+
     generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
     
 def deal_update_controller_state_response(proto_inst, fileno):
@@ -200,20 +247,27 @@ def deal_update_controller_state_response(proto_inst, fileno):
     response_code = ResponseCode()
     response_code.ParseFromString(proto_inst['data'])
     header_inst = proto_inst['header_inst']
+    
+    log_msg = 'From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- '
+    log_handler.communication(log_msg)
+
+    result = SUC
     if header_inst.source == BIRTH_TYPE_AUTO:
         if response_code.code == OK:
-            print "update time succeed"
             db_inst = DbOperator()
             db_inst.update_controller(proto_inst.controller_id, proto_inst.state)
-            return 1
+
+            log_msg = "From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- update  succeed"
+            reslut = SUC        
         else:
-            print "update time failed, error log : %s" %response_code.log
-            return 0
+            log_msg = "From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- update failed, error log : %s" %response_code.log
+            result = FAI
     else:
         try:
             dj_handler = django_client_dic[header_inst.connection]
-        except KeyError:
-            return 0
+        except KeyError, e:
+            log_msg = 'In deal_update_controller_state_response: %s'%(str(e))
+            return ERR
         #TODO: 构造Json格式，发送
         json_inst = {'uri': 'device/controller',
                      'type': 'response',
@@ -221,18 +275,26 @@ def deal_update_controller_state_response(proto_inst, fileno):
                      'data': response_code.log,
                     }
         if response_code.code == 0:
-            print "update time succeed"
+            log_msg = "From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- update  succeed"
+            result  = SUC
         else:
-            print "update time failed, error log : %s" %response_code.log
             json_inst['code'] = -1
             json_inst['data'] = 'something wrong'
-        
+            result = FAI
+
+            log_msg = "From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- update failed, error log : %s" %response_code.log
+        log_handler.communication(log_msg)
+            
         head = D_HEAD
         version = D_VERSION  #TODO:版本统一 
+
+        log_msg = 'To django UPDATE_CONTROLLER_STATE_RESPONSE -- head: %s, version: %s, body: %s' %(head, version, json.dumps(json_inst))
+        log_handler.communication(log_msg)
+
         message_to_dj = gene_django_frame(head, version, json_inst)
         dj_handler.handler.send(message_to_dj)
-        return 1
-    
+        return result
+
 # ===================================================================================
 
 def read_sensor_data(room_id, fileno):
@@ -251,7 +313,11 @@ def read_sensor_data(room_id, fileno):
 def deal_read_sensor_data_response(proto_inst, fileno):
     sensor_data = SensorData()
     sensor_data.ParseFromString(proto_inst['data'])
-    
+    message_header = proto_inst['header_inst']
+
+    log_msg = 'From ARM READ_SENSOR_DATA -- '
+    log_handler.communication(log_msg)
+
 #     room_id = sensor_data.room.room_id
     room_id = sensor_data.room_id
     sensor_time = sensor_data.time.timestamp
@@ -267,22 +333,38 @@ def deal_read_sensor_data_response(proto_inst, fileno):
     
     if len(threshold) > 0 :
         if  data[TEMP].value < threshold[room_id][0][2]:
-            print "it is too cold, please worm me up!"
+            log_msg = "it is too cold, please worm me up!"
 #             update_controller_state(db_inst.controller_dict[sensor_data.room][0], 1, fileno)
             #TODO: 
         elif data[TEMP].value > threshold[room_id][0][3]:
-            print 'it is too hot, please cool me down!'
+            log_msg = 'it is too hot, please cool me down!'
+        else:
+            log_msg = 'Hemperature is OK'
+        log_handler.communication(log_msg)
+
         if  data[HUMI].value < threshold[room_id][0][4]:
-            print 'it is too dry, please give me some water!'
+            log_msg = 'it is too dry, please give me some water!'
         elif data[HUMI].value > threshold[room_id][0][5]:
-            print 'it is too humid, please dry me up!'
+            log_msg = 'it is too humid, please dry me up!'
+        else:
+            log_msg = 'Humidity is OK'
+        log_handler.communication(log_msg)
+
         if  data[CO2].value < threshold[room_id][0][6]:
-            print 'it is co2-less, please give me some co2!'
+            log_msg = 'it is co2-less, please give me some co2!'
         elif data[CO2].value > threshold[room_id][0][7]:
-            print 'it is co2-ful, please give me some fresh air!'
+            log_msg = 'it is co2-ful, please give me some fresh air!'
+        else:
+            log_msg = 'CO2 is OK'
+        log_handler.communication(log_msg)
+
         if data[LIGHT].value != threshold[room_id][0][8]:
-            print 'it is time to change light to %s' %(threshold[room_id][0][8])
-    
+            log_msg = 'it is time to change light to %s' %(threshold[room_id][0][8])
+        else:
+            log_msg = 'light is OK'
+        
+        log_handler.communication(log_msg)    
+
     read_sensor_data(room_id, fileno)
     
 def deal_sensor_data_push(proto_inst, fileno):
@@ -301,7 +383,11 @@ def init_sync(proto_inst, fileno):
     """
     conf_init = Init()
     conf_init.ParseFromString(proto_inst['data'])
-    
+    message_header = proto_inst['header_inst']
+
+    log_msg = 'From ARM INIT -- '
+    log_handler.communication(log_msg)
+
     db_inst = MssqlConnection()
     
     for one_room in conf_init.roomconf:
@@ -323,7 +409,9 @@ def init_sync(proto_inst, fileno):
         val = one_config.val
         
         sys_config_dict[key] = val
-        print 'Here in init_sync key: %s value: %d' %(key, sys_config_dict[key])
+        
+        log_msg = 'Here in init_sync key: %s value: %d' %(key, sys_config_dict[key])
+        log_handler.debug(log_msg)
 
 def reboot(fileno):
     """
@@ -365,7 +453,6 @@ def deal_reboot_response(proto_inst, fileno):
             print "update time failed, error log : %s" %response_code.log
           
 # ===================================================================================
-
 arm_protocal = {
     READ_TIME : deal_read_time,
     UPDATE_TIME : update_time,
@@ -390,3 +477,9 @@ arm_protocal = {
     
     INIT : init_sync,
 }
+
+
+body_dict = {
+    1: arm_protocal,
+    }
+    

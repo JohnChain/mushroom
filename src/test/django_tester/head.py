@@ -47,11 +47,11 @@ SELECT_TIMEOUT = 2
 #: 僵尸套接字连接判断时间
 SOCKET_TIMEOUT = 10
 #: 对 ARM 提供链接服务的地址及端口
-ARM_SERVER_ADDR = ('127.0.0.1', 10001)
-#ARM_SERVER_ADDR = ('10.18.50.66', 9000)
+# ARM_SERVER_ADDR = ('127.0.0.1', 10001)
+ARM_SERVER_ADDR = ('10.18.50.66', 9000)
 #: 对 Django 提供链接服务的地址及端口 
-DJANGO_SERVER_ADDR = ('127.0.0.1', 10002)
-#DJANGO_SERVER_ADDR = ('10.18.50.66', 9001)
+# DJANGO_SERVER_ADDR = ('127.0.0.1', 10002)
+DJANGO_SERVER_ADDR = ('10.18.50.66', 9001)
 
 #: 方向，本系统中包括 ARM 和 Django
 # from mesgtype_pb2 import *

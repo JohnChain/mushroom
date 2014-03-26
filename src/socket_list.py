@@ -78,9 +78,9 @@ class SocketList:
         :param param: 【未用】
         :rtype: return 0 if scucess, or -1 if something wrong
         """
-        log_msg = 'Thread ' + self.thread_name + 'Server is ready'
-        log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
-
+        log_msg = 'Thread ' + self.thread_name + ' Server is Ready'
+#         log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+        log_handler.work(log_msg)
         while not stopEvent.isSet():
             try:
                 sk_node, readable, writable, exceptional = ('', '', '', '')
@@ -90,7 +90,6 @@ class SocketList:
                     if not (readable or writable or exceptional) :
 #                         log_msg = "%s Time out ! clinet_list length is %d" %(self.thread_name, len(self.client_list))
 #                         log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
-#                         print log_msg
                         continue
                     for sk_node in readable :
                         if sk_node.handler is self.server:
@@ -99,8 +98,8 @@ class SocketList:
                             connection.settimeout(RECV_TIMEOUT)
 
                             log_msg = "[ %s ] One Connection Established From :%s, Fileno = %d" %(self.thread_name, str(client_address), connection.fileno())
-                            log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
-                            print log_msg
+#                             log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+                            log_handler.work(log_msg)
 
                             client = SkNode()
                             client.handler = connection
@@ -119,19 +118,20 @@ class SocketList:
                             result = one_client_dealer.main_receivor()
                             if result == 1 :
                                 log_msg = "[ %s ] One frame solved from fileno %d " %(self.thread_name, sk_node.fileno())
-                                print log_msg
+                                log_handler.work(log_msg)
                                 print "=========================================== \n"
 
                             elif result == -1 :
                                 log_msg = "[ %s ] One connection Timeout from fileno %d " %(self.thread_name, sk_node.fileno())
-                                log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+                                log_handler.work(log_msg)
+#                                 log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
-                                print log_msg
                                 self.dead_client_dealer(sk_node)
-                                print "Now the connection list is :"
+                                log_msg = "Now the connection list is : "
                                 for i in range(len(self.client_list)):
-                                    print self.client_list[i].fileno(),
-                                print ''
+                                    log_msg += str(self.client_list[i].fileno())
+                                log_handler.work(log_msg)
+
                     for sk_node in exceptional:
                         print " exception condition on ", sk_node.getpeername()
                         #: stop listening for input on the connection
@@ -139,9 +139,9 @@ class SocketList:
                         self.client_dict.pop(sk_node.fileno())
                         sk_node.close()
             except socket.error, e:
-                msg = "[ %s ] Socket error from fileno : %d " %(self.thread_name, sk_node.fileno)
-                log_manager.add_work_log(str(msg), sys._getframe().f_code.co_name)
-                print msg
+                log_msg = "[ %s ] Socket error from fileno : %d " %(self.thread_name, sk_node.fileno())
+                log_handler.error(log_msg)
+#                 log_manager.add_work_log(str(log_msg), sys._getframe().f_code.co_name)
 
                 self.dead_client_dealer(sk_node)
                 continue
@@ -150,9 +150,9 @@ class SocketList:
             self.dead_client_dealer(self.client_dict[key])
 
         log_msg = '%s Server shutdown! Thread cleaned, remain client number: %d ' %(self.thread_name, len(self.client_list))
-        log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+        log_handler.work(log_msg)
+#         log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
-        print log_msg
         print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
 
     def dead_client_dealer(self, client):
@@ -165,8 +165,8 @@ class SocketList:
 #         client.handler.send('***')
 #         except socket.error:
         log_msg = "[ %s ] CLOSING DEAD CLIENT %s" %(self.thread_name, str(client.fileno()))
-        log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
-        print log_msg
+        log_handler.work(log_msg)
+#         log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
 #         try:
         client.mylock.acquire()

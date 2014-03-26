@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from head import *
 from task_list import *
-from mushroom_pb2 import *
 
 def generate_task(one_task, sub_frame, fileno, version, birth_type):
     """
@@ -27,22 +26,28 @@ def gene_message_header(message_id, session, type, version, connection, source =
     temp_header.source      = source
     temp_header.version     = version
     
-    message_header          = temp_header.SerializeToString()
-    return message_header
+    # message_header          = temp_header.SerializeToString()
+    return temp_header
 
 def gene_arm_frame(message_header = '', data = '', ):
     if data != '':
         data = data.SerializeToString()
-    
+    if message_header != '':
+        message_header = message_header.SerializeToString()
+#     from head import *
     m_header_len = '{:{fill}{width}{base}}'.format(len(message_header), fill = '0', width = 2 * A_header_byte, base = 'x')
     m_header_len = a2b_hex(m_header_len)
-    print "heaer_len = %d" %len(message_header)
     
-
+    log_msg = "heaer_len = %d" %len(message_header)
+    log_handler.debug(log_msg)
+    
     temp_pkg_len = len(message_header) + len(data) + A_header_byte
     pkg_len = '{:{fill}{width}{base}}'.format(temp_pkg_len, fill = '0', width = 2 * A_pkg_byte, base = 'x')
     pkg_len = a2b_hex(pkg_len)
-    print 'Pkg_len = %d' %temp_pkg_len
+    
+    log_msg = 'Pkg_len = %d' %temp_pkg_len
+    log_handler.debug(log_msg)
+    
     main_frame = A_HEAD + pkg_len + m_header_len + message_header + data
     return main_frame
 

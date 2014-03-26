@@ -3,9 +3,11 @@
 import sys
 import json
 import Queue
+import ctypes
 import select
 import socket
 import pyodbc
+import logging
 import threading
 from time import *
 from datetime import *
@@ -14,12 +16,13 @@ from signal import signal, SIGINT
 from binascii import a2b_hex, b2a_hex
 
 from mushroom_pb2 import *
+
 sensor_type_dict = {
                TEMP : 'temperature',
                LIGHT: 'light',
                HUMI : 'humidity',
                CO2  : 'co2',
-               }
+        }
 
 controller_type_dict = {
                    XUNHUAN_FAN  : 'xunhuan_fan',
@@ -31,15 +34,22 @@ controller_type_dict = {
                    YELLOW_LIGHT : 'yello_light',
                    RED_LIGHT    : 'red_light',
                    BLUE_LIGHT   : 'blue_light',
-                   }
+        }
 
 sys_config_dict = {
               'TIME_SYNC_CYCLE' : 50,
               
               }
 
+# 开
+ON = 1
+# 关
+OFF = 0
+# 成功
 SUC = 0
+# 失败
 FAI = -1
+# 异常
 ERR = -2
 
 # 环境限定范围，由单独的线程负责不断刷新，键为房间号，值为一个队列，长度始终为2，
@@ -119,9 +129,10 @@ log_file = {
 
 LOG_TIMER_CYCLE = 1
 
-from log_manager import LogManager
+from log_manager import Logger
 #: 全局日志管理器
-log_manager = LogManager()
+# log_manager = LogManager()
+log_handler = Logger('', )
 
 #=============通信协议模块配置===============#
 #----- 控制端——>数据层 -------#
@@ -138,7 +149,7 @@ A_pkg_byte = 3
 #: 业务层消息头占字节数
 A_header_byte = 3
 #收数据超时
-RECV_TIMEOUT = 3
+RECV_TIMEOUT = 3    
 
 #: 与Django通信消息包的头标志
 D_HEAD = 'MUSHROOM'
@@ -149,8 +160,6 @@ D_version_byte = 1
 #: 业务层消息头占字节数
 D_lenght_byte = 4
 
-ON = 1
-OFF = 0
 
 #: 控制命令取值
 ctrl_cmd = {
@@ -170,3 +179,4 @@ check_state_result = {
               'ON' : '1',
               'OFF': '0',
                       }
+

@@ -9,12 +9,18 @@ from task_deliver import TaskDeliver
 from load_threshold import load_threshold
 
 def handler(signal, frame):
-    msg = 'Main process is going to shutdown : '
-    log_manager.add_work_log(msg, sys._getframe().f_code.co_name)
-        
+    log_msg = 'Main process is going to shutdown : '
+    log_handler.work(log_msg)
+#     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+#     print log_msg
+    
     main_event.set()
     for thread in thread_list:
         thread.join()
+        
+    log_msg = 'System Shutdown'
+    log_handler.work(log_msg)
+    
     sys.exit()
     
 main_event = Event()
@@ -26,10 +32,12 @@ def main():
     
     :rtype: 0
     """
-    log_manager_thread = MyThread('log_manager', log_manager.record_thread_main, '')
-    log_manager_thread.start()
+    log_msg = 'Start From Main Function'
+#     log_manager_thread = MyThread('log_manager', log_manager.record_thread_main, '')
+#     log_manager_thread.start()
+#     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
     
-    log_manager.add_work_log('Start from main function', sys._getframe().f_code.co_name)
+    log_handler.work(log_msg)
     
     temp_task = TaskDeliver()
     task_deliver = MyThread('task_deliver', temp_task.core, ('', ))
@@ -53,7 +61,7 @@ def main():
     thread_list.append(ram_server)
     thread_list.append(django_server)
     thread_list.append(threshold_loader)
-    thread_list.append(log_manager_thread)
+#     thread_list.append(log_manager_thread)
     
     signal(SIGINT, handler)
     try:

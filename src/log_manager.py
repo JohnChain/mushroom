@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
+# from head import log_conf
 from head import *
-from head import log_conf
+# from utils import *
+
 class LogType:
     """
     日志类
@@ -215,6 +217,110 @@ class LogManager:
         """
         pass
 
+
+FOREGROUND_WHITE = 0x0007
+FOREGROUND_BLUE = 0x01 # text color contains blue.
+FOREGROUND_GREEN= 0x02 # text color contains green.
+FOREGROUND_RED  = 0x04 # text color contains red.
+FOREGROUND_YELLOW = FOREGROUND_RED | FOREGROUND_GREEN
+
+STD_OUTPUT_HANDLE= -11
+std_out_handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+
+def set_color(color, handle=std_out_handle):
+    bool = ctypes.windll.kernel32.SetConsoleTextAttribute(handle, color)
+    return bool
+
+class Logger():
+    def __init__(self, param, \
+                 work_path = log_file['WORK'], \
+                 communication_path = log_file['COMMUNICATION'], \
+                 debug_path = log_file['DEBUG'], 
+                 error_path = log_file['ERROR']):
+        self.work_log = logging.getLogger('WORK')
+        self.work_log.setLevel(logging.DEBUG)
+        self.communication_log = logging.getLogger('COMMUNICATION')
+        self.communication_log.setLevel(logging.DEBUG)
+        self.error_log = logging.getLogger('ERROR')
+        self.error_log.setLevel(logging.DEBUG)
+        self.debug_log = logging.getLogger('DEBUG')
+        self.debug_log.setLevel(logging.DEBUG)
+        
+        fmt = logging.Formatter('[%(asctime)s] [Level = %(levelname)s] [ThreadName = %(threadName)s] [ThreadID = %(thread)d] -- %(message)s', '%Y-%m-%d %H:%M%S')
+
+        #设置CMD日志
+        sh = logging.StreamHandler()
+        sh.setFormatter(fmt)
+        sh.setLevel(logging.DEBUG)
+        
+        #设置文件日志
+        work_fh = logging.FileHandler(work_path)
+        work_fh.setFormatter(fmt)
+        work_fh.setLevel(logging.INFO)
+
+        communication_fh = logging.FileHandler(communication_path)
+        communication_fh.setFormatter(fmt)
+        communication_fh.setLevel(logging.INFO)
+
+        error_fh = logging.FileHandler(error_path)
+        error_fh.setFormatter(fmt)
+        error_fh.setLevel(logging.ERROR)
+
+        debug_fh = logging.FileHandler(debug_path)
+        debug_fh.setFormatter(fmt)
+        debug_fh.setLevel(logging.DEBUG)
+
+        self.work_log.addHandler(sh)
+        self.communication_log.addHandler(sh)
+        self.error_log.addHandler(sh)
+        self.debug_log.addHandler(sh)
+  
+        self.work_log.addHandler(work_fh)
+        self.communication_log.addHandler(communication_fh)
+        self.error_log.addHandler(error_fh)
+        self.debug_log.addHandler(debug_fh)
+
+    def debug(self, msg):
+        self.debug_log.debug(msg)
+
+    def work(self, msg):
+        self.work_log.info(msg)
+
+#     def communication(self,msg,):
+#         self.communication_log.info(msg)
+# 
+#     def error(self, msg):
+#         self.error_log.error(msg)
+
+    def communication(self,msg, color = FOREGROUND_YELLOW):
+        set_color(color)
+        self.communication_log.info(msg)
+        set_color(FOREGROUND_WHITE)
+ 
+    def error(self, msg, color=FOREGROUND_RED):
+        set_color(color)
+        self.error_log.error(msg)
+        set_color(FOREGROUND_WHITE)
+
+    def enable_work(self):
+        self.work_log.setLevel(logging.INFO)
+    def disable_work(self):
+        self.work_log.setLevel(logging.WARNING)
+    
+    def enable_communication(self):
+        self.communication_log.setLevel(logging.INFO)
+    def disable_communication(self):
+        self.communication_log.setLevel(logging.WARNING)
+    
+    def enable_debug(self):
+        self.debug_log.setLevel(logging.DEBUG)
+    def disable_debug(self):
+        self.debug_log.setLevel(logging.INFO)
+    
+    def enable_error(self):
+        self.error_log.setLevel(logging.ERROR)
+    def disable_error(self):
+        self.error_log.setLevel(logging.CRITICAL)
 
 if __name__ == '__main__':
 

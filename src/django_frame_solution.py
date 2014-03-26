@@ -21,7 +21,10 @@ class DjangoFrameSolution():
             head += handler.recv(2)
             if head == D_HEAD[:3]:
                 head += handler.recv(len(D_HEAD)- 3)
-                print head
+                
+                log_msg = 'From django received full head : %s' %head
+                log_handler.debug(log_msg)
+
                 if head == D_HEAD:
                     version = handler.recv(1)
                     length = int(b2a_hex(handler.recv(4)), 16)
@@ -62,7 +65,9 @@ class DjangoFrameSolution():
         :param frame: 带构造成数据包的信息 
         :rtype: 成功返回 构造结果 ， 失败返回空字符串 
         """
-        print json_frame
+        log_msg = 'From django -- %s' %json_frame
+        log_handler.communication(log_msg)
+        
         return json.loads(json_frame)
         
 
@@ -74,19 +79,20 @@ class DjangoFrameSolution():
         :rtype: 【待定】
         """
         if json_inst['uri'] == "device/controller":
-            print 'here1'
             if json_inst['type'] == 'request':
-                print 'here2'
-                return device_controller(json_inst, client_handler)
+                return device_update(json_inst, client_handler)
         elif json_inst['uri'] == 'device/viewer':
             if json_inst['type'] == 'request':
-                return device_viewer(json_inst, client_handler)
-        elif json_inst['uri'] == "log/viewer":
-                return log_view(json_inst, client_handler)
+                return device_view(json_inst, client_handler)
+#         elif json_inst['uri'] == "log/viewer":
+#                 return log_view(json_inst, client_handler)
         elif json_inst['uri'] == 'config/log':
             if json_inst['type'] == 'request':
                 return log_config(json_inst, client_handler)
-        
+        elif json_inst['type'] == "device/controller/sync":
+            pass
         else:
-            print 'here3'
+            log_msg = 'here3'
+            log_handler.debug(log_msg)
+
             return 0

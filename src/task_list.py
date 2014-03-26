@@ -56,16 +56,15 @@ class TaskList():
         """
         # ERROR************
         try:
-            
             self.task_list.pop(task_id)
             
             log_msg = '[ Task Deliver ] Remove one task, id : %d' %(task_id)
-            log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+            # log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
+            log_handler.work(log_msg)
             
         except KeyError:
-            print 'in remove task key error'
-            pass
-
+            log_msg = 'In remove task key error'
+            log_handler.error(log_msg)
 
 class GlobalTaskId:
     global_task_id = 0

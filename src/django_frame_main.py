@@ -15,7 +15,7 @@ class DjangoFrameMain():
         """
         连接实例主处理入口，收取数据
 
-        :rtype: 如果接受数据不为空， 返回 1， 如果查过判断僵死时间，返回 -1， 否则返回 0
+        :rtype: 如果接受数据不为空， 返回 1， 如果超过判断僵死时间，返回 -1， 否则返回 0
         """
         #log_msg = 'In DjangoFrameMain, later will server one client'
         #log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
@@ -23,7 +23,6 @@ class DjangoFrameMain():
         servant = DjangoFrameSolution()
         version, body = servant.receive(self.client.handler)
         if body != '':
-            print "DOWN MAIN THREAD STARTED !"
             self.client.mylock.acquire()
             self.client.last_time = datetime.now()
             self.client.mylock.release()
@@ -34,12 +33,15 @@ class DjangoFrameMain():
             json_inst = servant.parse(json_frame)
             # 带入计算公式计算
             result = servant.dispatch(json_inst, self.client.handler)
-            print 'dispatch result = %d' %result
-            if result == 1:
+            
+            log_msg = 'dispatch result = %d' %result
+            log_handler.debug(log_msg)
+
+            if result == SUC:
                 return result
         now_time = datetime.now()
         gap = (now_time - self.client.last_time).seconds
         if gap > SOCKET_TIMEOUT:
-            return -1
+            return ERR
         else:
-            return 0
+            return result
