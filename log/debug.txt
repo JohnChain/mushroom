@@ -1,4 +1,27 @@
-[2014-03-23 11:5951] [Level = DEBUG] [ThreadName = f1 Thread] [ThreadID = 6972] -- here in f1
-[2014-03-23 11:5951] [Level = DEBUG] [ThreadName = f2 Thread] [ThreadID = 2852] -- here in f2
-[2014-03-23 11:5953] [Level = DEBUG] [ThreadName = f1 Thread] [ThreadID = 6972] -- here in f1
-[2014-03-23 11:5953] [Level = DEBUG] [ThreadName = f2 Thread] [ThreadID = 2852] -- here in f2
+[2014-03-26 21:5038] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 8540] -- Up main_receivor dealing message !
+[2014-03-26 21:5038] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 8540] -- Here in init_sync key: TIME_SYNC_CYCLE value: 60
+[2014-03-26 21:5038] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 8540] -- Up main_receivor dealing message !
+[2014-03-26 21:5038] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 8540] -- heaer_len = 13
+[2014-03-26 21:5038] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 8540] -- Pkg_len = 37
+[2014-03-26 21:5038] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 8540] -- length of task_list is 1
+[2014-03-26 21:5445] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 4280] -- Up main_receivor dealing message !
+[2014-03-26 21:5445] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 4280] -- Here in init_sync key: TIME_SYNC_CYCLE value: 60
+[2014-03-26 21:5445] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 4280] -- Up main_receivor dealing message !
+[2014-03-26 21:5445] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 4280] -- heaer_len = 13
+[2014-03-26 21:5445] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 4280] -- Pkg_len = 37
+[2014-03-26 21:5445] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 4280] -- length of task_list is 1
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- From django received full head : MUSHROOM
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- In device_update...
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- heaer_len = 14
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- Pkg_len = 21
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- dispatch result = 0
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 4280] -- Up main_receivor dealing message !
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- From django received full head : MUSHROOM
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- In device_view...
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- heaer_len = 14
+[2014-03-26 21:5521] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- Pkg_len = 19
+[2014-03-26 21:5527] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- dispatch result = 0
+[2014-03-26 21:5527] [Level = DEBUG] [ThreadName = ram_server] [ThreadID = 4280] -- Up main_receivor dealing message !
+[2014-03-26 21:5527] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- From django received full head : MUSHROOM
+[2014-03-26 21:5527] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- here3
+[2014-03-26 21:5527] [Level = DEBUG] [ThreadName = django_server] [ThreadID = 8228] -- dispatch result = 0

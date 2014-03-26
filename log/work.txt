@@ -1,127 +1,45 @@
-[2014-03-23 11:5951] [Level = INFO] [ThreadName = f1 Thread] [ThreadID = 6972] -- here in f1
-[2014-03-23 11:5951] [Level = INFO] [ThreadName = f2 Thread] [ThreadID = 2852] -- here in f2
-[2014-03-23 11:5953] [Level = INFO] [ThreadName = f1 Thread] [ThreadID = 6972] -- here in f1
-[2014-03-23 11:5953] [Level = INFO] [ThreadName = f2 Thread] [ThreadID = 2852] -- here in f2
-[2014-03-23 11:5955] [Level = INFO] [ThreadName = f1 Thread] [ThreadID = 6972] -- exit from f1
-[2014-03-23 11:5955] [Level = INFO] [ThreadName = f2 Thread] [ThreadID = 2852] -- exit from f2
-WORK	 || 	2014-03-24 19:16:59	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:16:59	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:16:59	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:16:59	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:16:59	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:16:59	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:22:13	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:22:13	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:22:13	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:22:13	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:22:13	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:22:13	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:22:33	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 4331), Fileno = 868	 || 	manage_list
-WORK	 || 	2014-03-24 19:22:44	 || 	[ RAM ] One connection Timeout from fileno 868 	 || 	manage_list
-WORK	 || 	2014-03-24 19:22:44	 || 	[ RAM ] CLOSING DEAD CLIENT 868	 || 	dead_client_dealer
-WORK	 || 	2014-03-24 19:23:35	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 4400), Fileno = 868	 || 	manage_list
-WORK	 || 	2014-03-24 19:23:46	 || 	[ RAM ] One connection Timeout from fileno 868 	 || 	manage_list
-WORK	 || 	2014-03-24 19:23:46	 || 	[ RAM ] CLOSING DEAD CLIENT 868	 || 	dead_client_dealer
-WORK	 || 	2014-03-24 19:24:07	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 4440), Fileno = 740	 || 	manage_list
-WORK	 || 	2014-03-24 19:24:18	 || 	[ RAM ] One connection Timeout from fileno 740 	 || 	manage_list
-WORK	 || 	2014-03-24 19:24:18	 || 	[ RAM ] CLOSING DEAD CLIENT 740	 || 	dead_client_dealer
-WORK	 || 	2014-03-24 19:24:33	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 4469), Fileno = 884	 || 	manage_list
-WORK	 || 	2014-03-24 19:24:44	 || 	[ RAM ] One connection Timeout from fileno 884 	 || 	manage_list
-WORK	 || 	2014-03-24 19:24:44	 || 	[ RAM ] CLOSING DEAD CLIENT 884	 || 	dead_client_dealer
-WORK	 || 	2014-03-24 19:24:50	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 4493), Fileno = 868	 || 	manage_list
-WORK	 || 	2014-03-24 19:24:50	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = Óÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-time_sync_cycle< 	 || 	unpack
-WORK	 || 	2014-03-24 19:25:52	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:25:52	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:25:52	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:25:52	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:25:52	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:25:52	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:28:25	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:28:25	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:28:25	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:28:25	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:28:25	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:28:25	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:28:28	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 4724), Fileno = 364	 || 	manage_list
-WORK	 || 	2014-03-24 19:28:28	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = ºÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-TIME_SYNC_CYCLE< 	 || 	unpack
-WORK	 || 	2014-03-24 19:29:51	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:29:51	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:29:51	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:29:51	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:29:51	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:29:51	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:29:54	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 4813), Fileno = 888	 || 	manage_list
-WORK	 || 	2014-03-24 19:29:54	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = ºÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-TIME_SYNC_CYCLE< 	 || 	unpack
-WORK	 || 	2014-03-24 19:32:23	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:32:23	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:32:23	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:32:23	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:32:23	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:32:23	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:32:29	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 4992), Fileno = 376	 || 	manage_list
-WORK	 || 	2014-03-24 19:32:29	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = ºÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-TIME_SYNC_CYCLE< 	 || 	unpack
-WORK	 || 	2014-03-24 19:33:35	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:33:35	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:33:35	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:33:35	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:33:35	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:33:35	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:33:39	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:33:39	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:33:39	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:33:39	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:33:39	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:33:39	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:33:43	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 5075), Fileno = 364	 || 	manage_list
-WORK	 || 	2014-03-24 19:33:43	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = ºÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-TIME_SYNC_CYCLE< 	 || 	unpack
-WORK	 || 	2014-03-24 19:46:04	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 19:46:04	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 19:46:04	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 19:46:04	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 19:46:04	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:46:04	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 19:46:10	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 7095), Fileno = 376	 || 	manage_list
-WORK	 || 	2014-03-24 19:46:10	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = ºÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-TIME_SYNC_CYCLE< 	 || 	unpack
-WORK	 || 	2014-03-24 20:33:00	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 20:33:00	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 20:33:00	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 20:33:00	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 20:33:00	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 20:33:00	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 20:33:06	 || 	[ RAM ] One Connection Established From :('127.0.0.1', 14182), Fileno = 876	 || 	manage_list
-WORK	 || 	2014-03-24 20:33:06	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = ºÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-TIME_SYNC_CYCLE< 	 || 	unpack
-WORK	 || 	2014-03-24 20:33:17	 || 	[ RAM ] One connection Timeout from fileno 876 	 || 	manage_list
-WORK	 || 	2014-03-24 20:33:17	 || 	[ RAM ] CLOSING DEAD CLIENT 876	 || 	dead_client_dealer
-WORK	 || 	2014-03-24 20:36:31	 || 	Log Manager Thread Ready	 || 	record_thread_main
-WORK	 || 	2014-03-24 20:36:31	 || 	Start from main function	 || 	main
-WORK	 || 	2014-03-24 20:36:31	 || 	[Task Deliver ] Thread task delivery is ready ...	 || 	core
-WORK	 || 	2014-03-24 20:36:31	 || 	Thread Load Threshold is ready ...	 || 	load_threshold
-WORK	 || 	2014-03-24 20:36:31	 || 	Thread RAMServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 20:36:31	 || 	Thread DjangoServer is ready	 || 	manage_list
-WORK	 || 	2014-03-24 20:36:36	 || 	[ RAM ] One Connection Established From :('10.18.50.66', 14422), Fileno = 884	 || 	manage_list
-WORK	 || 	2014-03-24 20:36:36	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = ºÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-TIME_SYNC_CYCLE< 	 || 	unpack
-WORK	 || 	2014-03-24 20:36:47	 || 	[ RAM ] One connection Timeout from fileno 884 	 || 	manage_list
-WORK	 || 	2014-03-24 20:36:47	 || 	[ RAM ] CLOSING DEAD CLIENT 884	 || 	dead_client_dealer
-WORK	 || 	2014-03-24 20:39:11	 || 	[ RAM ] One Connection Established From :('10.18.50.66', 14595), Fileno = 888	 || 	manage_list
-WORK	 || 	2014-03-24 20:39:11	 || 	Receive From ARM: pkg_len = 80    header_len = 40    header = ºÿÿÿÿÿÿÿÿÿ (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data = 
-
-TIME_SYNC_CYCLE< 	 || 	unpack
-WORK	 || 	2014-03-24 20:39:11	 || 	Receive From ARM: pkg_len = 33    header_len = 30    header =  (ÿÿÿÿÿÿÿÿÿ0ÿÿÿÿÿÿÿÿÿ    data =  	 || 	unpack
-WORK	 || 	2014-03-24 20:39:11	 || 	[ Task Deliver ] Send one task id : 0	 || 	core
-WORK	 || 	2014-03-24 20:39:17	 || 	[ Task Deliver ] Remove one task, id : 0	 || 	remove
+[2014-03-26 21:5012] [Level = INFO] [ThreadName = MainThread] [ThreadID = 8868] -- Start From Main Function
+[2014-03-26 21:5012] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 3372] --  Thread Task Delivery is Ready ...
+[2014-03-26 21:5012] [Level = INFO] [ThreadName = load threshold] [ThreadID = 7704] -- Thread Load Threshold is Ready ...
+[2014-03-26 21:5012] [Level = INFO] [ThreadName = ram_server] [ThreadID = 8540] -- Thread RAM Server is Ready
+[2014-03-26 21:5012] [Level = INFO] [ThreadName = django_server] [ThreadID = 6408] -- Thread Django Server is Ready
+[2014-03-26 21:5038] [Level = INFO] [ThreadName = ram_server] [ThreadID = 8540] -- [ RAM ] One Connection Established From :('10.18.50.66', 62686), Fileno = 896
+[2014-03-26 21:5038] [Level = INFO] [ThreadName = ram_server] [ThreadID = 8540] -- [ RAM ] One frame solved from fileno 896 
+[2014-03-26 21:5038] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 3372] -- [ Task Deliver ] Send one task id : 0
+[2014-03-26 21:5044] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 3372] -- [ Task Deliver ] Remove one task, id : 0
+[2014-03-26 21:5143] [Level = INFO] [ThreadName = MainThread] [ThreadID = 8868] -- Main process is going to shutdown : 
+[2014-03-26 21:5144] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 3372] -- [ Task Deliver ] Task Deliver shutdown and cleaned! 
+[2014-03-26 21:5146] [Level = INFO] [ThreadName = ram_server] [ThreadID = 8540] -- [ RAM ] CLOSING DEAD CLIENT 896
+[2014-03-26 21:5146] [Level = INFO] [ThreadName = ram_server] [ThreadID = 8540] -- [ RAM ] CLOSING DEAD CLIENT 444
+[2014-03-26 21:5146] [Level = INFO] [ThreadName = ram_server] [ThreadID = 8540] -- RAM Server shutdown! Thread cleaned, remain client number: 0 
+[2014-03-26 21:5146] [Level = INFO] [ThreadName = django_server] [ThreadID = 6408] -- [ Django ] CLOSING DEAD CLIENT 496
+[2014-03-26 21:5146] [Level = INFO] [ThreadName = django_server] [ThreadID = 6408] -- Django Server shutdown! Thread cleaned, remain client number: 0 
+[2014-03-26 21:5146] [Level = INFO] [ThreadName = load threshold] [ThreadID = 7704] -- Load Threshold Thread shutdown and cleaned! 
+[2014-03-26 21:5419] [Level = INFO] [ThreadName = MainThread] [ThreadID = 7088] -- Start From Main Function
+[2014-03-26 21:5419] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 4656] --  Thread Task Delivery is Ready ...
+[2014-03-26 21:5419] [Level = INFO] [ThreadName = load threshold] [ThreadID = 5364] -- Thread Load Threshold is Ready ...
+[2014-03-26 21:5419] [Level = INFO] [ThreadName = ram_server] [ThreadID = 4280] -- Thread RAM Server is Ready
+[2014-03-26 21:5419] [Level = INFO] [ThreadName = django_server] [ThreadID = 8228] -- Thread Django Server is Ready
+[2014-03-26 21:5445] [Level = INFO] [ThreadName = ram_server] [ThreadID = 4280] -- [ RAM ] One Connection Established From :('10.18.50.66', 62952), Fileno = 892
+[2014-03-26 21:5445] [Level = INFO] [ThreadName = ram_server] [ThreadID = 4280] -- [ RAM ] One frame solved from fileno 892 
+[2014-03-26 21:5445] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 4656] -- [ Task Deliver ] Send one task id : 0
+[2014-03-26 21:5451] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 4656] -- [ Task Deliver ] Remove one task, id : 0
+[2014-03-26 21:5521] [Level = INFO] [ThreadName = django_server] [ThreadID = 8228] -- [ Django ] One Connection Established From :('10.18.50.66', 62990), Fileno = 924
+[2014-03-26 21:5521] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 4656] -- [ Task Deliver ] Send one task id : 1
+[2014-03-26 21:5521] [Level = INFO] [ThreadName = ram_server] [ThreadID = 4280] -- [ RAM ] One frame solved from fileno 892 
+[2014-03-26 21:5527] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 4656] -- [ Task Deliver ] Remove one task, id : 1
+[2014-03-26 21:5527] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 4656] -- [ Task Deliver ] Send one task id : 2
+[2014-03-26 21:5527] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 4656] -- [ Task Deliver ] Remove one task, id : 2
+[2014-03-26 21:5708] [Level = INFO] [ThreadName = MainThread] [ThreadID = 7088] -- Main process is going to shutdown : 
+[2014-03-26 21:5709] [Level = INFO] [ThreadName = task_deliver] [ThreadID = 4656] -- [ Task Deliver ] Task Deliver shutdown and cleaned! 
+[2014-03-26 21:5709] [Level = INFO] [ThreadName = MainThread] [ThreadID = 7088] -- Main process is going to shutdown : 
+[2014-03-26 21:5711] [Level = INFO] [ThreadName = ram_server] [ThreadID = 4280] -- [ RAM ] CLOSING DEAD CLIENT 448
+[2014-03-26 21:5711] [Level = INFO] [ThreadName = ram_server] [ThreadID = 4280] -- [ RAM ] CLOSING DEAD CLIENT 892
+[2014-03-26 21:5711] [Level = INFO] [ThreadName = ram_server] [ThreadID = 4280] -- RAM Server shutdown! Thread cleaned, remain client number: 0 
+[2014-03-26 21:5713] [Level = INFO] [ThreadName = django_server] [ThreadID = 8228] -- [ Django ] CLOSING DEAD CLIENT 924
+[2014-03-26 21:5713] [Level = INFO] [ThreadName = django_server] [ThreadID = 8228] -- [ Django ] CLOSING DEAD CLIENT 524
+[2014-03-26 21:5713] [Level = INFO] [ThreadName = django_server] [ThreadID = 8228] -- Django Server shutdown! Thread cleaned, remain client number: 0 
+[2014-03-26 21:5713] [Level = INFO] [ThreadName = load threshold] [ThreadID = 5364] -- Load Threshold Thread shutdown and cleaned! 
+[2014-03-26 21:5713] [Level = INFO] [ThreadName = MainThread] [ThreadID = 7088] -- System Shutdown
+[2014-03-26 21:5713] [Level = INFO] [ThreadName = MainThread] [ThreadID = 7088] -- Main process is going to shutdown : 
+[2014-03-26 21:5713] [Level = INFO] [ThreadName = MainThread] [ThreadID = 7088] -- System Shutdown
