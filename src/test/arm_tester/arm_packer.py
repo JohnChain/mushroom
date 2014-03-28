@@ -14,12 +14,14 @@ def read_time():
     return main_frame
 
 def read_time_response(proto_inst, handler):
+    print 'got read time response'
     data = SynTime()
     data.ParseFromString(proto_inst['data'])
     print 'Get one read_time_response, time : %s' %(data.timestamp)
 
 
 def update_time_response(proto_inst, handler):
+    print 'get update time'
     header = proto_inst['header_inst']
     data = SynTime()
     data.ParseFromString(proto_inst['data'])
@@ -42,6 +44,7 @@ def update_time_response(proto_inst, handler):
     return main_frame
 
 def read_controller_state_response(proto_inst, handler):
+    print 'get read controller'
     header = proto_inst['header_inst']
     data = Controller()
     data.ParseFromString(proto_inst['data'])
@@ -66,7 +69,7 @@ def read_controller_state_response(proto_inst, handler):
     return main_frame
 
 def update_controller_state_response(proto_inst, handler):
-    
+    print 'get update controller'
     header = proto_inst['header_inst']
     data = Controller()
     data.ParseFromString(proto_inst['data'])
@@ -106,14 +109,14 @@ def read_sensor_data_response(proto_inst, handler):
     header = gene_message_header(READ_SENSOR_DATA_RESPONSE, session, type, version, connection, source)
     
     data = SensorData()
-    data.room.room_id = room_id
+    data.room_id = room_id
     data.time.timestamp = (datetime.now()).strftime('%Y-%m-%d %H:%M:%S')
     #data.sensor = Sensor()
     
     temp = data.sensor.add()
     humi = data.sensor.add()
     co2  = data.sensor.add()
-    light= data.sensor.add() 
+    light= data.sensor.add()
     
     temp.id = 1
     temp.type = TEMP

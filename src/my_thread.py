@@ -32,7 +32,7 @@ class MyThread(threading.Thread):
         self.stop_Event.set()
         try:
             threading.Thread.join(self)
-        except thread.error, e:
+        except threading.thread.error, e:
             log_msg = str(e)
             log_handler.error(e)
 

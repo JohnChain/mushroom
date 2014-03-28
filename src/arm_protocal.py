@@ -39,7 +39,9 @@ def deal_read_time(proto_inst, fileno):
 
     log_msg = "length of task_list is %d" %len(global_task_list.task_list)
     log_handler.debug(log_msg)
-
+    
+    update_time('', fileno)
+    
     return SUC
 
 def update_time(proto_inst, fileno):
@@ -60,7 +62,7 @@ def update_time(proto_inst, fileno):
     message_header = gene_message_header(UPDATE_TIME, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
 
     log_msg = 'To ARM UPDATE_TIME -- taskID: %d, connection: %d, source: %d, version: %d, time: %s'\
-                                %(one_task.id, fileno, one_task.birth_type, version, data.timestamp)
+                                %(one_task.id, fileno, BIRTH_TYPE_AUTO, version, data.timestamp)
     log_handler.communication(log_msg)
 
 
@@ -98,6 +100,9 @@ def deal_update_time_response(proto_inst, fileno):
         result = ERR
     
     log_handler.communication(log_msg)
+    
+    read_controller_state(1, fileno)
+    
     return result
 
 #===================================================================================
@@ -187,7 +192,6 @@ def deal_read_controller_state_response(proto_inst, fileno):
     if header_inst.source == BIRTH_TYPE_AUTO:
         db_inst = DbOperator()
         db_inst.update_controller(proto_data.controller_id, proto_data.state)
-        return 1
     else:
         dj_node = django_client_dic[header_inst.connection]
         #TODO: 构造Json格式，发送
@@ -206,8 +210,10 @@ def deal_read_controller_state_response(proto_inst, fileno):
 
         log_msg = 'To django view device response -- head: %s, version: %d, data: %s' %(head, version, json.dumps(json_inst))
         log_handler.communication(log_msg)
-
-        return 1
+    
+    update_controller_state(1, ON, fileno)
+    
+    return SUC
         
 def update_controller_state(controller_id, state, fileno):
     """
@@ -254,8 +260,9 @@ def deal_update_controller_state_response(proto_inst, fileno):
     result = SUC
     if header_inst.source == BIRTH_TYPE_AUTO:
         if response_code.code == OK:
-            db_inst = DbOperator()
-            db_inst.update_controller(proto_inst.controller_id, proto_inst.state)
+            #TODO: 无法直接获知被成功更改的控制器ID 及更改后状态
+#             db_inst = DbOperator()
+#             db_inst.update_controller(response_code.controller_id, response_code.state)
 
             log_msg = "From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- update  succeed"
             reslut = SUC        
@@ -293,7 +300,9 @@ def deal_update_controller_state_response(proto_inst, fileno):
 
         message_to_dj = gene_django_frame(head, version, json_inst)
         dj_handler.handler.send(message_to_dj)
-        return result
+        
+    read_sensor_data(1, fileno)
+    return result
 
 # ===================================================================================
 

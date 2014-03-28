@@ -28,6 +28,8 @@ class TaskDeliver():
                 if  len(key_list) > 0:
                     # TODO: comment or let it go
                     for key in key_list:
+#                         log_msg = 'dealing one task'
+#                         log_handler.debug(log_msg)
                         try:
                             one_task = global_task_list.task_list[key]
                             if one_task.state == TASK_READY:
@@ -52,8 +54,10 @@ class TaskDeliver():
                         except IndexError:
                             log_msg = '[ Task Deliver ] %s' %str(e)
                             continue
-                else:
-                    task_condition.wait(TASK_WAIT_CIRCLE)
+#                 else:
+                task_condition.wait(TASK_WAIT_CIRCLE)
+                log_msg = 'task deliver waked'
+                log_handler.debug(log_msg)
             task_condition.release()
         else:
             print '!!!!!!!!!!! task_condition not acquired'

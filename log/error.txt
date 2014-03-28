@@ -1,0 +1,4 @@
+[2014-03-27 14:5458] [Level = ERROR] [ThreadName = django_server] [ThreadID = 4680] -- [ Django ] Socket error from fileno : 892 
+[2014-03-28 10:5335] [Level = ERROR] [ThreadName = ram_server] [ThreadID = 7804] -- [ RAM ] Socket error from fileno : 900 
+[2014-03-28 13:2316] [Level = ERROR] [ThreadName = ram_server] [ThreadID = 1128] -- [ RAM ] Socket error from fileno : 892 
+[2014-03-28 13:4638] [Level = ERROR] [ThreadName = ram_server] [ThreadID = 6260] -- [ RAM ] Socket error from fileno : 892 

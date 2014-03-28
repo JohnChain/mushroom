@@ -39,14 +39,14 @@ def gene_arm_frame(message_header = '', data = '', ):
     m_header_len = a2b_hex(m_header_len)
     
     log_msg = "heaer_len = %d" %len(message_header)
-    log_handler.debug(log_msg)
+#     log_handler.debug(log_msg)
     
     temp_pkg_len = len(message_header) + len(data) + A_header_byte
     pkg_len = '{:{fill}{width}{base}}'.format(temp_pkg_len, fill = '0', width = 2 * A_pkg_byte, base = 'x')
     pkg_len = a2b_hex(pkg_len)
     
     log_msg = 'Pkg_len = %d' %temp_pkg_len
-    log_handler.debug(log_msg)
+#     log_handler.debug(log_msg)
     
     main_frame = A_HEAD + pkg_len + m_header_len + message_header + data
     return main_frame

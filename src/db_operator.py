@@ -5,7 +5,8 @@ from db_base import MssqlConnection
 from db_env import *
 
 class DbOperator(MssqlConnection):
-    def __init__(self, serverIp, dbName, uid, pwd):
+    def __init__(self, serverIp = db_conn_info['HOST'], dbName = db_conn_info['DATABASE'], \
+                 uid = db_conn_info['USER'], pwd = db_conn_info['PASSWORD']):
         MssqlConnection.__init__(self, serverIp, dbName, uid, pwd)
         
     def get_room_info(self, room_id):

@@ -35,4 +35,5 @@ class ArmFrameMain():
             result = servant.dispatch(protobuf_inst, self.handler)
             return 1
         else:
-            print 'get on empyt pack'
+            pass
+#             print 'get on empyt pack'

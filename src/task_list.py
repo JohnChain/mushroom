@@ -6,7 +6,7 @@ class Task():
     """
     任务类型
     """
-    def __init__(self, birth_type = '', frame = '', birth_time = datetime.now()):
+    def __init__(self, birth_type = BIRTH_TYPE_AUTO, frame = '', birth_time = datetime.now()):
         #: 任务初始方向（UP/DOWN）
         self.birth_type = birth_type
         #: 来源套接字的文件描述符（用于到连接字典查询相应连接句柄）
@@ -46,6 +46,8 @@ class TaskList():
             self.task_list[one_task.id] = one_task
             task_condition.notifyAll()
             task_condition.release()
+            log_msg = 'One task added'
+            log_handler.debug(log_msg)
     
     def remove(self, task_id):
         """

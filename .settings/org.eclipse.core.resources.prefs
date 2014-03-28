@@ -16,6 +16,7 @@ encoding//src/server.py=utf-8
 encoding//src/socket_list.py=utf-8
 encoding//src/task_deliver.py=utf-8
 encoding//src/task_list.py=utf-8
+encoding//src/test/arm_tester/arm_frame_main.py=utf-8
 encoding//src/test/arm_tester/arm_frame_solution.py=utf-8
 encoding//src/test/arm_tester/arm_tester.py=utf-8
 encoding//src/test/arm_tester/head.py=utf-8

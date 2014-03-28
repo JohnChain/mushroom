@@ -20,6 +20,7 @@ class DjangoFrameMain():
         #log_msg = 'In DjangoFrameMain, later will server one client'
         #log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
+        result = FAI
         servant = DjangoFrameSolution()
         version, body = servant.receive(self.client.handler)
         if body != '':
@@ -38,10 +39,10 @@ class DjangoFrameMain():
             log_handler.debug(log_msg)
 
             if result == SUC:
-                return result
+                return SUC
         now_time = datetime.now()
         gap = (now_time - self.client.last_time).seconds
         if gap > SOCKET_TIMEOUT:
             return ERR
         else:
-            return result
+            return FAI

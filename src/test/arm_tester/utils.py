@@ -21,13 +21,13 @@ def gene_arm_frame(message_header = '', data = '', ):
     
     m_header_len = '{:{fill}{width}{base}}'.format(len(message_header), fill = '0', width = 2 * byte_m_header_len, base = 'x')
     m_header_len = a2b_hex(m_header_len)
-    print "heaer_len = %d" %len(message_header)
+#     print "heaer_len = %d" %len(message_header)
     
 
     temp_pkg_len = len(message_header) + len(data) + byte_m_header_len
     pkg_len = '{:{fill}{width}{base}}'.format(temp_pkg_len, fill = '0', width = 2 * byte_pkg_len, base = 'x')
     pkg_len = a2b_hex(pkg_len)
-    print 'Pkg_len = %d' %temp_pkg_len
+#     print 'Pkg_len = %d' %temp_pkg_len
     main_frame = A_HEAD + pkg_len + m_header_len + message_header + data
     return main_frame
 

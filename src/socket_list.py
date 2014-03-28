@@ -116,12 +116,12 @@ class SocketList:
                             one_client_dealer = self.FrameMain(sk_node)
 #                             print "client_List = %s, ram_client_list = %s" %(self.client_list, self.ram_client_list)
                             result = one_client_dealer.main_receivor()
-                            if result == 1 :
+                            if result == SUC :
                                 log_msg = "[ %s ] One frame solved from fileno %d " %(self.thread_name, sk_node.fileno())
                                 log_handler.work(log_msg)
                                 print "=========================================== \n"
 
-                            elif result == -1 :
+                            elif result == ERR :
                                 log_msg = "[ %s ] One connection Timeout from fileno %d " %(self.thread_name, sk_node.fileno())
                                 log_handler.work(log_msg)
 #                                 log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
@@ -129,9 +129,10 @@ class SocketList:
                                 self.dead_client_dealer(sk_node)
                                 log_msg = "Now the connection list is : "
                                 for i in range(len(self.client_list)):
-                                    log_msg += str(self.client_list[i].fileno())
+                                    log_msg += str(self.client_list[i].fileno()) + ', '
                                 log_handler.work(log_msg)
-
+                            elif result == FAI:
+                                continue
                     for sk_node in exceptional:
                         print " exception condition on ", sk_node.getpeername()
                         #: stop listening for input on the connection
