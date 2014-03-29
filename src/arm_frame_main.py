@@ -36,23 +36,24 @@ class ArmFrameMain():
             # 解包
             protobuf_msg_dic = servant.unpack(origin_frame)
             if protobuf_msg_dic == '':
-                return 0
+                return FAI
             # 反序列化
             protobuf_inst = servant.parse(protobuf_msg_dic)
             if protobuf_inst == '':
-                return 0
+                return FAI
             # 分发数据
             result = servant.dispatch(protobuf_inst, self.client.fileno())
-            if result == 0:
-                return 1
-            else:
-                return 0
+            return result
+#             if result == SUC:
+#                 return SUC
+#             else:
+#                 return result
         else:
             now_time = datetime.now()
             gap = (now_time - self.client.last_time).seconds
             if gap > SOCKET_TIMEOUT:
-                return -1
+                return ERR
             else:
-                return 0
+                return FAI
         
     

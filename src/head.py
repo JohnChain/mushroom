@@ -38,8 +38,12 @@ controller_type_dict = {
 
 sys_config_dict = {
               'TIME_SYNC_CYCLE' : 50,
-              
               }
+
+room_dict = {
+             'sensor': [],
+             'controller': [],
+             }
 
 # 开
 ON = 1
@@ -63,10 +67,6 @@ arm_client_dic = {}
 django_client_list = []
 django_client_dic = {}
 
-#: 全局标志集
-GLOBAL_FLAG = {
-        "SYSTEM_STOP" : 1,
-        }
 
 #============任务队列模块配置==============#
 #: 任务超时时长（s）
@@ -104,7 +104,7 @@ BIRTH_TYPE_AUTO      = 1
 #==============数据库模块配置=============#
 #: 数据库连接参数
 db_conn_info = {
-    "HOST"      : "10.18.50.66",
+    "HOST"      : "10.18.50.10",
 #     "HOST"      : "127.0.0.1",
     "USER"      : "wsngump",
     "PASSWORD"  : "wsngump",
@@ -161,22 +161,22 @@ D_version_byte = 1
 D_lenght_byte = 4
 
 
-#: 控制命令取值
-ctrl_cmd = {
-            'ON' : '1',
-            'OFF': '0',
-            }
-
-# ------ 数据层 ——> 控制层 ---------#
-
-#: 控制器设置结果
-ctrl_result = {
-             'SUCCESS'  : '0',
-             'FAIL'     : '1',
-             }
-#: 控制器状态检测结果
-check_state_result = {
-              'ON' : '1',
-              'OFF': '0',
-                      }
+# #: 控制命令取值
+# ctrl_cmd = {
+#             'ON' : '1',
+#             'OFF': '0',
+#             }
+# 
+# # ------ 数据层 ——> 控制层 ---------#
+# 
+# #: 控制器设置结果
+# ctrl_result = {
+#              'SUCCESS'  : '0',
+#              'FAIL'     : '1',
+#              }
+# #: 控制器状态检测结果
+# check_state_result = {
+#               'ON' : '1',
+#               'OFF': '0',
+#                       }
 

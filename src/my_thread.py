@@ -35,5 +35,9 @@ class MyThread(threading.Thread):
         except threading.thread.error, e:
             log_msg = str(e)
             log_handler.error(e)
+        except AttributeError, e:
+            log_msg = str(e)
+            log_handler.error(e)
+
 
 

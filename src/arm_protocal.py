@@ -40,7 +40,7 @@ def deal_read_time(proto_inst, fileno):
     log_msg = "length of task_list is %d" %len(global_task_list.task_list)
     log_handler.debug(log_msg)
     
-    update_time('', fileno)
+#     update_time('', fileno)
     
     return SUC
 
@@ -211,7 +211,7 @@ def deal_read_controller_state_response(proto_inst, fileno):
         log_msg = 'To django view device response -- head: %s, version: %d, data: %s' %(head, version, json.dumps(json_inst))
         log_handler.communication(log_msg)
     
-    update_controller_state(1, ON, fileno)
+#     update_controller_state(1, ON, fileno)
     
     return SUC
         
@@ -301,7 +301,7 @@ def deal_update_controller_state_response(proto_inst, fileno):
         message_to_dj = gene_django_frame(head, version, json_inst)
         dj_handler.handler.send(message_to_dj)
         
-    read_sensor_data(1, fileno)
+#     read_sensor_data(1, fileno)
     return result
 
 # ===================================================================================
@@ -374,7 +374,7 @@ def deal_read_sensor_data_response(proto_inst, fileno):
         
         log_handler.communication(log_msg)    
 
-    read_sensor_data(room_id, fileno)
+#     read_sensor_data(room_id, fileno)
     
 def deal_sensor_data_push(proto_inst, fileno):
     #TODO: 同 deal_read_sensor_data_response
@@ -406,12 +406,14 @@ def init_sync(proto_inst, fileno):
             sensor_type = sensor_type_dict[one_sensor.type]
             
             db_inst.insert_sensor(sensor_id, sensor_type, room_id)  
+            room_dict['sensor'].append(sensor_id)
             
         for one_controller in one_room.controller:
             controller_id = one_controller.controller_id
             controller_type = controller_type_dict[one_controller.type]
             
             db_inst.insert_controller(controller_id, controller_type, room_id)
+            room_dict['controller'].append(controller_id)
             
     for one_config in conf_init.config:
         key = one_config.key
@@ -421,7 +423,8 @@ def init_sync(proto_inst, fileno):
         
         log_msg = 'Here in init_sync key: %s value: %d' %(key, sys_config_dict[key])
         log_handler.debug(log_msg)
-
+        
+    return SUC
 def reboot(fileno):
     """
     重启控制系统
@@ -462,7 +465,7 @@ def deal_reboot_response(proto_inst, fileno):
             print "update time failed, error log : %s" %response_code.log
           
 # ===================================================================================
-arm_protocal = {
+arm_protocal1 = {
     READ_TIME : deal_read_time,
     UPDATE_TIME : update_time,
     UPDATE_TIME_RESPONSE : deal_update_time_response,
@@ -489,6 +492,6 @@ arm_protocal = {
 
 
 body_dict = {
-    1: arm_protocal,
+    1: arm_protocal1,
     }
     

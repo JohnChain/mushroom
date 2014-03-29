@@ -63,7 +63,7 @@ def load_threshold(stopEvent, param, ):
     log_handler.work(log_msg)
 #     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
-    print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+    print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
 
     exit()
 if __name__ == '__main__':

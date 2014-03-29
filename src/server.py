@@ -9,6 +9,7 @@ from task_deliver import TaskDeliver
 from load_threshold import load_threshold
 
 def handler(signal, frame):
+    print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
     log_msg = 'Main process is going to shutdown : '
     log_handler.work(log_msg)
 #     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)

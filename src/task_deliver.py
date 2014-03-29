@@ -51,13 +51,13 @@ class TaskDeliver():
                         except NameError, e:
                             log_msg = '[ Task Deliver ] %s' %str(e)
                             continue
-                        except IndexError:
+                        except IndexError, e:
                             log_msg = '[ Task Deliver ] %s' %str(e)
                             continue
 #                 else:
                 task_condition.wait(TASK_WAIT_CIRCLE)
-                log_msg = 'task deliver waked'
-                log_handler.debug(log_msg)
+#                 log_msg = 'task deliver waked'
+#                 log_handler.debug(log_msg)
             task_condition.release()
         else:
             print '!!!!!!!!!!! task_condition not acquired'
@@ -66,5 +66,5 @@ class TaskDeliver():
         log_handler.work(log_msg)
 #         log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 #         print log_msg
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
         exit()

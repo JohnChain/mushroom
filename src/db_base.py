@@ -227,7 +227,7 @@ class MssqlConnection:
             return FAI
         return SUC
     
-    def insert_controller(self, controller_id, controller_type, room_id, state = ON):
+    def insert_controller(self, controller_id, controller_type, room_id, state = OFF):
         """
         插入控制器信息
         
