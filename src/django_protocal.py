@@ -24,15 +24,16 @@ def device_update(json_inst, client_handler):
     data = Controller()
     data.controller_id = int(json_inst['data']['controllerId'])
     #TODO: 'on'/'off' 全局标记
-    if json_inst['data']['action'] == 'on':
+    if json_inst['data']['action'] == 'on'or json_inst['data']['action'] == 'ON':
         data.state = Controller.OPEN
     else:
         data.state = Controller.CLOSE
 #     data.room.room_id = json_inst['data']['roomId']
     version = 1
+    
     main_frame = gene_arm_frame(message_header = message_header, data = data, )
     
-    log_msg = 'To ARM UPDATE_CONTROLLER_STATE -- %s' %b2a_hex(main_frame)
+    log_msg = 'To ARM UPDATE_CONTROLLER_STATE -- \n%s' %(b2a_hex(main_frame))
     log_handler.communication(log_msg)
 
     generate_task(one_task, main_frame, client_handler.fileno(), version, BIRTH_TYPE_MANUAL)
@@ -66,39 +67,52 @@ def device_view(json_inst, client_handler):
     generate_task(one_task, main_frame, client_handler.fileno(), version, BIRTH_TYPE_MANUAL)
     return SUC
 
-# def log_view(json_inst, client_handler):
-#     """
-#     控制设备
-#     
-#     :param json_inst: jeon 格式的对象
-#     :clent_handler: TCP连接句柄
-#     :rtype: SUC 无误， FAI 有误, ERR 异常
-#     """
-#     log_msg = 'In log view'
-#     log_handler.debug(log_msg)
-# 
-#     # log_inst = log_manager.view_record(json_inst['type'])
-#     
-#     response = {'uri': 'log',
-#                 'type': 'response',
-#                 }
-#     if log_inst != '': 
-#         response['code'] = 0
-#         response['data'] = log_inst.type + log_inst.time + log_inst.msg + log_inst.location
-#         message = gene_django_frame(D_HEAD, D_VERSION, response)
-# 
-#         client_handler.send(message)
-#     else:
-#         response['code'] = -1
-#         response['data'] = 'log list empty'
-#         message = gene_django_frame(D_HEAD, D_VERSION, response)
-#         client_handler.send(message)
-#         log_msg = 'log list is empty'
-#         log_handler.debug(log_msg)
-#     
-#     log_msg = 'To django log_view response -- head: %s, version: %d, json: %s' %(D_HEAD, D_VERSION, json.dumps(response))
-#     log_handler.communication(log_msg)
-#     return SUC
+def log_view(json_inst, client_handler):
+    """
+    控制设备
+     
+    :param json_inst: jeon 格式的对象
+    :clent_handler: TCP连接句柄
+    :rtype: SUC 无误， FAI 有误, ERR 异常
+    """
+    log_msg = 'In log view'
+    log_handler.debug(log_msg)
+ 
+    # log_inst = log_manager.view_record(json_inst['type'])
+     
+    print log_conf
+     
+    response = {'uri': 'log',
+                'type': 'response',
+                'code': SUC,
+                'data': {},
+                }
+    if log_conf['WORK'] == ON:
+        response['data']['work'] = 'on'
+    else:    
+        response['data']['work'] = 'off'
+        
+    if log_conf['ERROR'] == ON:
+        response['data']['error'] = 'on'
+    else:    
+        response['data']['error'] = 'off'
+        
+    if log_conf['COMMUNICATION'] == ON:
+        response['data']['communication'] = 'on'
+    else:    
+        response['data']['communication'] = 'off'
+        
+    if log_conf['DEBUG'] == ON:
+        response['data']['debug'] = 'on'
+    else:    
+        response['data']['debug'] = 'off'
+        
+    message = gene_django_frame(D_HEAD, D_VERSION, response)
+    client_handler.send(message)
+     
+    log_msg = 'To django log_view response -- head: %s, version: %d, json: %s' %(D_HEAD, D_VERSION, json.dumps(response))
+    log_handler.communication(log_msg)
+    return SUC
 
 def log_config(json_inst, client_handler):
     """
@@ -157,6 +171,9 @@ def log_config(json_inst, client_handler):
 
     log_msg = 'To django log_config response -- head: %s, version: %d, json: %s' %(D_HEAD, D_VERSION, json.dumps(response))
     log_handler.communication(log_msg)
+    
+    print log_conf
+    
     return SUC
 
 django_protocal_buffer = {

@@ -26,7 +26,7 @@ class ArmFrameMain():
             log_msg = "Up main_receivor dealing message !"
             log_handler.debug(log_msg)
 
-            log_msg = 'From ARM ONE FULL FRAME: %s' %b2a_hex(origin_frame)
+            log_msg = 'From ARM ONE FULL FRAME: \n%s' %b2a_hex(origin_frame)
             log_handler.communication(log_msg)
             
             self.client.mylock.acquire()

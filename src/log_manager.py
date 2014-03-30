@@ -246,7 +246,7 @@ class Logger():
         self.debug_log = logging.getLogger('DEBUG')
         self.debug_log.setLevel(logging.DEBUG)
         
-        fmt = logging.Formatter('[%(asctime)s] [Level = %(levelname)s] [ThreadName = %(threadName)s] [ThreadID = %(thread)d] -- %(message)s', '%Y-%m-%d %H:%M%S')
+        fmt = logging.Formatter('[%(asctime)s] [Level = %(levelname)s] [ThreadName = %(threadName)s] [ThreadID = %(thread)d] -- %(message)s', '%Y-%m-%d %H:%M:%S')
 
         #设置CMD日志
         sh = logging.StreamHandler()
@@ -283,14 +283,10 @@ class Logger():
     def debug(self, msg):
         self.debug_log.debug(msg)
 
-    def work(self, msg):
+    def work(self, msg, color = FOREGROUND_YELLOW):
+        set_color(color)
         self.work_log.info(msg)
-
-#     def communication(self,msg,):
-#         self.communication_log.info(msg)
-# 
-#     def error(self, msg):
-#         self.error_log.error(msg)
+        set_color(FOREGROUND_WHITE)
 
     def communication(self,msg, color = FOREGROUND_YELLOW):
         set_color(color)
@@ -299,28 +295,38 @@ class Logger():
  
     def error(self, msg, color=FOREGROUND_RED):
         set_color(color)
+        
         self.error_log.error(msg)
         set_color(FOREGROUND_WHITE)
 
     def enable_work(self):
         self.work_log.setLevel(logging.INFO)
+        log_conf['WORK'] = ON
     def disable_work(self):
         self.work_log.setLevel(logging.WARNING)
+        log_conf['WORK'] = OFF
     
     def enable_communication(self):
         self.communication_log.setLevel(logging.INFO)
+        log_conf['COMMUNICATION'] = ON
+        
     def disable_communication(self):
         self.communication_log.setLevel(logging.WARNING)
+        log_conf['COMMUNICATION'] = OFF
     
     def enable_debug(self):
         self.debug_log.setLevel(logging.DEBUG)
+        log_conf['DEBUG'] = ON
     def disable_debug(self):
         self.debug_log.setLevel(logging.INFO)
+        log_conf['DEBUG'] = OFF
     
     def enable_error(self):
         self.error_log.setLevel(logging.ERROR)
+        log_conf['ERROR'] = ON
     def disable_error(self):
         self.error_log.setLevel(logging.CRITICAL)
+        log_conf['ERROR'] = OFF
 
 if __name__ == '__main__':
 

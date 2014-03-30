@@ -54,10 +54,16 @@ class TaskDeliver():
                         except IndexError, e:
                             log_msg = '[ Task Deliver ] %s' %str(e)
                             continue
+                        except Exception, e:
+                            log_msg = '[ Task Deliver ] %s' %str(e)
+                            
+                            now_time = datetime.now()
+                            gap = (now_time - one_task.birth_time).seconds
+                            if gap > TASK_TIMEOUT:
+                                global_task_list.remove(key)
+                            continue
 #                 else:
                 task_condition.wait(TASK_WAIT_CIRCLE)
-#                 log_msg = 'task deliver waked'
-#                 log_handler.debug(log_msg)
             task_condition.release()
         else:
             print '!!!!!!!!!!! task_condition not acquired'

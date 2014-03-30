@@ -49,7 +49,9 @@ class DbOperator(MssqlConnection):
             # 有的房间没有实时数据，此时sensor字典为空
             pass
         return plant_dict
-
+    
+#     def get_room_info_1(self, room_id):
+    
     def get_all_room(self):
         """
         获取所有房间的最新基础信息
@@ -302,17 +304,17 @@ if __name__ == '__main__':
     temp = DbOperator(host, db_name, user, password)
     temp.test_connection()
     
-#     for i in range(10):
-#         temp.insert_data(2, datetime.now().strftime('%Y-%m-%d'), 12.0, 12.1, 12.2, 12.3)
-#         print "now is instance: %d" %i
+    for i in range(10):
+        temp.insert_data(2, datetime.now().strftime('%Y-%m-%d'), 12.0, 12.1, 12.2, 12.3)
+        print "now is instance: %d" %i
      
-    print temp.get_room_info(1) 
-    print temp.get_all_room()
-     
-    print len(temp.get_time_reange_data(2, '2013-12-24 0:0:0', '2013-12-25 0:0:0'))
-    print temp.all_policy_info()
-    print temp.get_policy(1)
-    print temp.current_policy(1)
+#     print temp.get_room_info(1) 
+#     print temp.get_all_room()
+#      
+#     print len(temp.get_time_reange_data(2, '2013-12-24 0:0:0', '2013-12-25 0:0:0'))
+#     print temp.all_policy_info()
+#     print temp.get_policy(1)
+#     print temp.current_policy(1)
      
 #     print temp.update_plant_info(1, 'strowberry')
 #     print temp.update_room_name(2, 'left_second')

@@ -20,8 +20,8 @@ def main():
     django_tester.send(device_viewer_frame)
     dj_reciver.main_receivor()
 
-    django_tester.send(log_viewer_frame)
-    dj_reciver.main_receivor()
+#     django_tester.send(log_viewer_frame)
+#     dj_reciver.main_receivor()
 
     django_tester.close()
 if __name__ == '__main__':

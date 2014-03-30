@@ -173,12 +173,14 @@ class SocketList:
         client.mylock.acquire()
         self.client_list.remove(client)
         self.client_dict.pop(client.fileno())
-#         try:
-#             client.handler.shutdown(socket.SHUT_RDWR)
-#         except Exception:
-#             pass
+        try:
+            client.handler.shutdown(socket.SHUT_RDWR)
+        except Exception:
+            pass
         client.handler.close()
         client.mylock.release()
+        log_msg = 'connection list is : %s ' %str(self.client_dict.keys())
+        log_handler.debug(log_msg)
 #         except Exception, e:
 #             print e
 #             self.client_list.remove(client)

@@ -34,7 +34,7 @@ def deal_read_time(proto_inst, fileno):
     
     # log_msg = 'To ARM READ_TIME_RESPONSE -- taskID: %d, connection: %d, source: %d, version: %d, time: %s'\
                                         # %(one_task.id, fileno, one_task.birth_type, version, data.timestamp)
-    log_msg = 'To ARM READ_TIME_RESPONSE -- %s' %b2a_hex(main_frame)
+    log_msg = 'To ARM READ_TIME_RESPONSE -- \n%s' %b2a_hex(main_frame)
     log_handler.communication(log_msg)
 
     log_msg = "length of task_list is %d" %len(global_task_list.task_list)
@@ -68,7 +68,7 @@ def update_time(proto_inst, fileno):
 
     main_frame = gene_arm_frame(data = data, message_header = message_header)
     
-    log_msg = 'To ARM UPDATE_TIME -- %s' %b2a_hex(main_frame)
+    log_msg = 'To ARM UPDATE_TIME -- \n%s' %b2a_hex(main_frame)
     log_handler.communication(log_msg)
 
     generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
@@ -101,7 +101,7 @@ def deal_update_time_response(proto_inst, fileno):
     
     log_handler.communication(log_msg)
     
-    read_controller_state(1, fileno)
+#     read_controller_state(1, fileno)
     
     return result
 
@@ -168,7 +168,7 @@ def read_controller_state(controller_id, fileno):
     message_header = gene_message_header(READ_CONTROLLER_STATE, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
     main_frame = gene_arm_frame(data = data, message_header = message_header)
     
-    log_msg = 'To ARM READ_CONTROLLER_STATE -- %s' %b2a_hex(main_frame)
+    log_msg = 'To ARM READ_CONTROLLER_STATE -- \n%s' %b2a_hex(main_frame)
     log_handler.communication(log_msg)
 
     generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
@@ -211,7 +211,7 @@ def deal_read_controller_state_response(proto_inst, fileno):
         log_msg = 'To django view device response -- head: %s, version: %d, data: %s' %(head, version, json.dumps(json_inst))
         log_handler.communication(log_msg)
     
-#     update_controller_state(1, ON, fileno)
+#     update_controller_state(proto_data.controller_id, ON, fileno)
     
     return SUC
         
@@ -235,10 +235,11 @@ def update_controller_state(controller_id, state, fileno):
     message_header = gene_message_header(UPDATE_CONTROLLER_STATE, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
     main_frame = gene_arm_frame(data = data, message_header = message_header)
     
-    log_msg = 'To ARM UPDATE_CONTROLLER_STATE -- %s' %b2a_hex(main_frame)
-    log_msg = 'To ARM UPDATE_CONTROLLER_STATE -- taskID: %d, connection: %d, source: %d version: %d, controller_id: %d, state: %d' \
+    log_msg1 = 'To ARM UPDATE_CONTROLLER_STATE -- taskID: %d, connection: %d, source: %d version: %d, controller_id: %d, state: %d \n' \
                                                             %(one_task.id, fileno, BIRTH_TYPE_AUTO, version, controller_id, state)
-    log_handler.communication(log_msg)
+    log_handler.communication(log_msg1)
+    log_msg2 = '%s' %b2a_hex(main_frame)
+    log_handler.communication(log_msg1 + log_msg2)
 
     generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
     
@@ -253,6 +254,11 @@ def deal_update_controller_state_response(proto_inst, fileno):
     response_code = ResponseCode()
     response_code.ParseFromString(proto_inst['data'])
     header_inst = proto_inst['header_inst']
+    
+    print django_client_dic.keys()
+    
+    print header_inst
+    print response_code
     
     log_msg = 'From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- '
     log_handler.communication(log_msg)
@@ -269,13 +275,15 @@ def deal_update_controller_state_response(proto_inst, fileno):
         else:
             log_msg = "From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- update failed, error log : %s" %response_code.log
             result = FAI
+        log_handler.work(log_msg)
+        return result
     else:
         try:
             dj_handler = django_client_dic[header_inst.connection]
         except KeyError, e:
             log_msg = 'In deal_update_controller_state_response: %s'%(str(e))
-            return ERR
-        #TODO: 构造Json格式，发送
+            log_handler.error(log_msg)
+            return FAI
         json_inst = {'uri': 'device/controller',
                      'type': 'response',
                      'code': response_code.code,
@@ -302,7 +310,10 @@ def deal_update_controller_state_response(proto_inst, fileno):
         dj_handler.handler.send(message_to_dj)
         
 #     read_sensor_data(1, fileno)
-    return result
+        return result
+    log_msg = 'header_inst.source not found'
+    log_handler.debug(log_msg)
+    return ERR   
 
 # ===================================================================================
 
@@ -317,34 +328,50 @@ def read_sensor_data(room_id, fileno):
     message_header = gene_message_header(READ_SENSOR_DATA, one_task.id, type, version, fileno, BIRTH_TYPE_AUTO)
     main_frame = gene_arm_frame(message_header, data)
     
+    log_msg = b2a_hex(main_frame)
+    log_handler.communication('To ARM READ_SENSOR_DATA -- \n ' + log_msg)
     generate_task(one_task, main_frame, fileno, version, BIRTH_TYPE_AUTO)
 
 def deal_read_sensor_data_response(proto_inst, fileno):
     sensor_data = SensorData()
     sensor_data.ParseFromString(proto_inst['data'])
+    
     message_header = proto_inst['header_inst']
 
-    log_msg = 'From ARM READ_SENSOR_DATA -- '
+    log_msg = 'From ARM READ_SENSOR_DATA_RESPONSE -- '
     log_handler.communication(log_msg)
 
-#     room_id = sensor_data.room.room_id
     room_id = sensor_data.room_id
-    sensor_time = sensor_data.time.timestamp
+    sense_time = sensor_data.time.timestamp
+    print 'sensor_time = %s' %sense_time
     data = {}
-    for one_data in sensor_data.sensor:
-        data[one_data.type] = one_data
     
     db_inst = MssqlConnection()
+    instance_id = db_inst.insert_instance(room_id, sense_time)
+    
+    if instance_id == FAI:
+        return FAI
+    
+    db_inst.connect()
+#     print 'db_handler = %s, cursor = %s' %(str(db_inst.handler), str(db_inst.cursor))
+#     db_inst.test_connection()
+    for one_data in sensor_data.sensor:
+        data[one_data.type] = one_data
+        
+        sql_str = 'insert into tb_data(instance_id, sensor_id, data) values(%d, %d, %f)' %(instance_id, one_data.id, one_data.value)
+        db_inst.executeDML(sql_str)
+    db_inst.close()
+        
     #TODO: 这里有个问题，每新建一个数据库实例时，会从数据库中load几张表，因为一下的insert_data函数用到了这些表，是否可以有更好的改进方法
-    db_inst.insert_data(room_id, sensor_time, \
-                        data[TEMP].value, data[HUMI].value, data[CO2].value, data[LIGHT].value,\
-                        data[TEMP].id, data[HUMI].id, data[CO2].id, data[LIGHT].id )
+#     db_inst.insert_data(room_id, sense_time, \
+#                         data[TEMP].value, data[HUMI].value, data[CO2].value, data[LIGHT].value,\
+#                         data[TEMP].id, data[HUMI].id, data[CO2].id, data[LIGHT].id )
     
     if len(threshold) > 0 :
         if  data[TEMP].value < threshold[room_id][0][2]:
             log_msg = "it is too cold, please worm me up!"
+            #TODO:
 #             update_controller_state(db_inst.controller_dict[sensor_data.room][0], 1, fileno)
-            #TODO: 
         elif data[TEMP].value > threshold[room_id][0][3]:
             log_msg = 'it is too hot, please cool me down!'
         else:
@@ -373,7 +400,8 @@ def deal_read_sensor_data_response(proto_inst, fileno):
             log_msg = 'light is OK'
         
         log_handler.communication(log_msg)    
-
+    else:
+        print 'thresholds not ready yet'
 #     read_sensor_data(room_id, fileno)
     
 def deal_sensor_data_push(proto_inst, fileno):
@@ -425,6 +453,7 @@ def init_sync(proto_inst, fileno):
         log_handler.debug(log_msg)
         
     return SUC
+
 def reboot(fileno):
     """
     重启控制系统
@@ -458,7 +487,6 @@ def deal_reboot_response(proto_inst, fileno):
         else:
             print "update time failed, error log : %s" %response_code.log
     else:
-        #TODO: 后期前台可以添加功能
         if response_code.code == OK:
             print "update time succeed"
         else:

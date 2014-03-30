@@ -106,7 +106,7 @@ BIRTH_TYPE_AUTO      = 1
 db_conn_info = {
     "HOST"      : "10.18.50.10",
 #     "HOST"      : "127.0.0.1",
-    "USER"      : "wsngump",
+    "USER"      : "sa",
     "PASSWORD"  : "wsngump",
     "DATABASE"  : "mushroom",
     }
@@ -114,10 +114,10 @@ db_conn_info = {
 #=============日志模块配置===============#
 #: 日志配置参数
 log_conf = {
-    'ERROR'           : 1,
-    'COMMUMICATION'   : 1,
-    'DEBUG'           : 1,
-    'WORK'            : 1,
+    'ERROR'           : ON,
+    'COMMUNICATION'   : ON,
+    'DEBUG'           : ON,
+    'WORK'            : ON,
     }
 
 log_file = {

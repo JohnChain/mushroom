@@ -37,7 +37,8 @@ class MssqlConnection:
         if self.handler == '':
             self.handler = pyodbc.connect(driver='{SQL Server}', server=self.host, \
                                           database=self.db_name, uid=self.user, pwd=self.password, unicode_results = True)  
-            self.cursor=self.handler.cursor()
+            self.cursor = self.handler.cursor()
+            
     
     def close(self): 
         """
@@ -104,11 +105,14 @@ class MssqlConnection:
         :param sql_str: 待执行的SQL语句 
         :rtype: 成功返回生效的数据条数， 失败返回-1 
         """  
-        cnt = self.cursor.execute(sql_str).rowcount
-        self.handler.commit()
-        return cnt
-    
-    
+        try:
+            cnt = self.cursor.execute(sql_str).rowcount
+            self.handler.commit()
+            return cnt
+        except Exception, e:
+            log_msg = str(e)
+            log_handler.error(log_msg)
+            return ERR
     def load_table(self):
         """
         将数据库中部分表加载到内存
@@ -223,9 +227,9 @@ class MssqlConnection:
             self.connect()
             self.executeDML(sql_str)
             self.close()
+            return SUC
         except Exception:
             return FAI
-        return SUC
     
     def insert_controller(self, controller_id, controller_type, room_id, state = OFF):
         """
@@ -246,7 +250,28 @@ class MssqlConnection:
         except Exception:
             return FAI
         return SUC
-        
+    
+    def insert_instance(self, room_id, sense_time):
+        try:
+            self.connect()
+            sql_str = "insert into tb_instance(room_id, sense_time) values(%d, '%s')" %(room_id, sense_time)
+            self.executeDML(sql_str)
+            sql_str = "select instance_id from tb_instance where room_id = %d and sense_time = '%s'" %(room_id, sense_time)
+            result = self.queryAll(sql_str)
+            self.close()
+            return result[0][0]
+        except IndexError:
+            log_msg = 'cannot create instance!'
+            log_handler.error(log_msg)
+            return FAI
+    
+    def insert_sensor_data(self, instance_id, sensor_id, value):
+        sql_str = 'insert into tb_data(instance_id, sensor_id, data) values(%d, %d, %f)' %(instance_id, sensor_id, value)
+        self.connect()
+        self.executeDML(sql_str)
+        self.close()
+        return SUC
+      
     def insert_data(self, room_id, sense_time, temperature, humidity, co2, light, \
                     temperature_id = -1, humidity_id = -1, co2_id = -1, light_id = -1):
         """
@@ -269,8 +294,9 @@ class MssqlConnection:
         self.connect()
 #         start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
-            sql_str = u"{call sp_insert_sense_data(%d, '%s', %f, %f, %f, %f, %d, %d, %d, %d)}" \
+            sql_str = "{call sp_insert_sense_data(%d, '%s', %f, %f, %f, %f, %d, %d, %d, %d)}" \
             %(room_id, sense_time, temperature, humidity, co2, light, temperature_id, humidity_id, co2_id, light_id) 
+            print sql_str
             self.executeDML(sql_str)
         except KeyError: 
             print 'sensor name error'

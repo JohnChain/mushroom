@@ -84,15 +84,16 @@ class DjangoFrameSolution():
         elif json_inst['uri'] == 'device/viewer':
             if json_inst['type'] == 'request':
                 return device_view(json_inst, client_handler)
-#         elif json_inst['uri'] == "log/viewer":
-#                 return log_view(json_inst, client_handler)
+        elif json_inst['uri'] == "log/viewer":
+            if json_inst['type'] == 'request':
+                return log_view(json_inst, client_handler)
         elif json_inst['uri'] == 'config/log':
             if json_inst['type'] == 'request':
                 return log_config(json_inst, client_handler)
         elif json_inst['type'] == "device/controller/sync":
             pass
         else:
-            log_msg = 'here3'
+            log_msg = 'Unknow uri'
             log_handler.debug(log_msg)
 
             return 0

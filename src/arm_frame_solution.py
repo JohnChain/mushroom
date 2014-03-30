@@ -21,20 +21,27 @@ class ArmFrameSolution():
         frame = ''
         cup = handler.recv(1)
         if cup == A_HEAD[0]:
-            frame += cup
-            cup = handler.recv(1)
-            if cup == A_HEAD[1]:
+            try:
                 frame += cup
-                cup = handler.recv(len(A_HEAD) - 2)
-                if cup == A_HEAD[2:]:
-                #TODO: 检测空字符和超长数据 
+                cup = handler.recv(1)
+                if cup == A_HEAD[1]:
                     frame += cup
-                    cup = handler.recv(A_pkg_byte)
-                    frame += cup
-                    pkg_len = int(b2a_hex(cup), 16)
-                    frame += handler.recv(pkg_len)
-                    #TODO: 读取超时处理
-                    return frame
+                    cup = handler.recv(len(A_HEAD) - 2)
+                    if cup == A_HEAD[2:]:
+                    #TODO: 检测空字符和超长数据 
+                        frame += cup
+                        cup = handler.recv(A_pkg_byte)
+                        log_msg = pkg_len = b2a_hex(cup)
+                        log_handler.debug(log_msg)
+                        frame += cup
+                        pkg_len = int(b2a_hex(cup), 16)
+                        frame += handler.recv(pkg_len)
+                        #TODO: 读取超时处理
+                        return frame
+            except ValueError, e:
+                log_msg = e
+                log_handler.error(log_msg)
+                return ''
         return ''
         
     def send(self, handler, frame):
@@ -70,14 +77,20 @@ class ArmFrameSolution():
 #             return ''
         frame = frame[len(A_HEAD):]
         pkg_len_hex = b2a_hex(frame[:A_pkg_byte])
-        print 'pkg_len_hex  = %s' %pkg_len_hex
+        
+        log_msg = 'pkg_len_hex  = %s' %pkg_len_hex
+        log_handler.debug(log_msg)
+        
         pkg_len = int(pkg_len_hex, 16)
         frame = frame[A_pkg_byte:]
         
 #         version = int(b2a_hex(frame[:byte_version]), 16)
 #         frame = frame[byte_version:]
         head_len_hex = b2a_hex(frame[:A_header_byte])
-        print 'head_len_hex = %s' %head_len_hex
+        
+        log_msg = 'head_len_hex = %s' %head_len_hex
+        log_handler.debug(log_msg)
+        
         header_len = int(head_len_hex, 16)
         
         frame = frame[A_header_byte:]
@@ -115,12 +128,15 @@ class ArmFrameSolution():
         message_id = proto_inst['header_inst'].message_id
         version = -1
         version = proto_inst['header_inst'].version
-        print 'bef dispatch: message_id = %s, version = %s' %(str(message_id), str(version))
         
-#         return body_dict[version][message_id](proto_inst, birth_fileno)
+        log_msg = 'bef dispatch: message_id = %s, version = %s' %(str(message_id), str(version))
+        log_handler.debug(log_msg)
+        
         try:
             return arm_protocal1[message_id](proto_inst, birth_fileno)
         except KeyError:
             log_msg = 'Drop illeagle message_id = %d' %message_id
             log_handler.error(log_msg)
             return FAI
+        
+#         return body_dict[version][message_id](proto_inst, birth_fileno)
