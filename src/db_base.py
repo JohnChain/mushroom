@@ -221,14 +221,19 @@ class MssqlConnection:
         :param state: 传感器当前状态
         :rtype: SUC 成功， FAI 失败， ERR 异常
         """
-        sql_str = '''insert into tb_sensor(sensor_id, sensor_type, room_id, position, state) 
-                    values(%d, '%s', %d, '%s', %d)''' %(sensor_id, sensor_type, room_id, position, state)
+#         sql_str = '''insert into tb_sensor(sensor_id, sensor_type, room_id, position, state) 
+#                     values(%d, '%s', %d, '%s', %d)''' %(sensor_id, sensor_type, room_id, position, state)
+        #TODO: update
+        sql_str = '''update tb_sense'''
         try:
             self.connect()
             self.executeDML(sql_str)
             self.close()
             return SUC
-        except Exception:
+        except Exception,e:
+            log_msg = 'in insert_sensor' + str(e)
+            log_handler.debug(log_msg)
+            
             return FAI
     
     def insert_controller(self, controller_id, controller_type, room_id, state = OFF):
@@ -243,6 +248,7 @@ class MssqlConnection:
         """
         sql_str = '''insert into tb_controller(controller_id, controller_type, room_id, state) 
                     values(%d, '%s', %d, %d)''' %(controller_id, controller_type, room_id, state)
+        #TODO: update
         try:
             self.connect()
             self.executeDML(sql_str)
@@ -420,10 +426,10 @@ class MssqlConnection:
         #TODO: 这里我们假设tb_absolute_time 中，一个房间只能有一种策略在执行，且目前版本，在系统初始化时务必这样，否则将混乱
         sql_str = u'''
                 select top 2 room_id, change_time, 
-                            temperature_valle, temperature_peak,  
+                            temperature_valle, temperature_peak,
                             humidity_valle, humidity_peak, 
                             co2_valle, co2_peak, 
-                            light_color
+                            light_color, reserved1_valle, reserved1_peak 
                 from vw_task
                 where change_time >= '%s' and room_id = %d
                 order by change_time

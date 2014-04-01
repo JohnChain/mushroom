@@ -60,7 +60,7 @@ ERR = -2
 # 其中第一个值为包含了当前使用的环境限定范围的元组，第二个值下一次刷新时间
 threshold = {}
 #:环境限制条件载入周期
-THRESHOLD_LOAD_CYCLE = 5
+THRESHOLD_LOAD_CYCLE = 30
 
 arm_client_list = []
 arm_client_dic = {}
@@ -104,9 +104,9 @@ BIRTH_TYPE_AUTO      = 1
 #==============数据库模块配置=============#
 #: 数据库连接参数
 db_conn_info = {
-    "HOST"      : "10.18.50.10",
+    "HOST"      : "10.18.50.66",
 #     "HOST"      : "127.0.0.1",
-    "USER"      : "sa",
+    "USER"      : "wsngump",
     "PASSWORD"  : "wsngump",
     "DATABASE"  : "mushroom",
     }

@@ -8,7 +8,42 @@ class DbOperator(MssqlConnection):
     def __init__(self, serverIp = db_conn_info['HOST'], dbName = db_conn_info['DATABASE'], \
                  uid = db_conn_info['USER'], pwd = db_conn_info['PASSWORD']):
         MssqlConnection.__init__(self, serverIp, dbName, uid, pwd)
+    
+    def get_latest_data(self, room_id):
+        sql_str = "select top 1 instance_id, sense_time, room_id from tb_instance where room_id = %d order by instance_id desc " %(room_id)
+        self.connect()
+        result = self.queryAll(sql_str)
         
+        instance_id = result[0][0]
+        sense_time  = result[0][1].strftime('%Y/%m/%d %H:%M:%S')
+        
+        sql_str = '''select tb_data.sensor_id, data, sensor_type from tb_data left join tb_sensor
+                        on tb_sensor.sensor_id = tb_data.sensor_id
+                    where instance_id = %d''' %instance_id
+        result = self.queryAll(sql_str)
+        self.close()
+        
+        json_inst = {'instance_id'  : instance_id,
+                     'sense_time'   : sense_time,
+                     'room_id'      : room_id,
+                     'sense_data'   :{
+                                      'temperature' : [],
+                                      'humidity'    : [],
+                                      'co2'         : [],
+                                      'light'       : [],
+                                      }
+                    }
+        
+        for one_row in result:
+            sensor_type = one_row[2]
+            sensor_id   = one_row[0]
+            data        = one_row[1]
+            
+            json_inst['sense_data'][sensor_type].append({'id': sensor_id, 'data': data})
+        
+        return json_inst
+ 
+    
     def get_room_info(self, room_id):
         """
         通过Room ID获取房间信息
@@ -108,7 +143,47 @@ class DbOperator(MssqlConnection):
             data_list.append(v)
 
         return data_list
-    
+
+    def certain_sensor_time_range_data(self, sensor_id, start_time, end_time):
+        """
+        通过sensor_id查询一段时间的数据
+        
+        :param sensor_id: 传感器ID
+        :param start_time: 起时间
+        :param end_time: 末时间
+        :rtype: json格式化字典
+        """
+        sql_str = '''
+                    select sense_time, position, sensor_type, data from 
+                        tb_data left join tb_instance on tb_data.instance_id = tb_instance.instance_id --as tb_temp 
+                        left join tb_sensor on tb_sensor.sensor_id = tb_data.sensor_id 
+                    where tb_data.sensor_id = %d and sense_time >= '%s' and sense_time <= '%s'
+                    ''' %(sensor_id, start_time, end_time)
+        
+        self.connect()
+        result = self.queryAll(sql_str)
+        self.close()
+        json_inst = {
+                      "sensorId": sensor_id,
+                      "sensorType": "",
+                      "position": "",
+                      "values":[],
+
+                     }
+        
+        for one_row in result:
+            sense_time  = one_row[0].strftime('%Y/%m/%d %H:%M:%S')
+            position    = one_row[1]
+            sensor_type = one_row[2]
+            data        = one_row[3]
+            
+            json_inst['sensorType'] = sensor_type
+            json_inst['position']   = position 
+            json_inst['values'].append((sense_time, data)) 
+        
+        json_inst['values'] = tuple(json_inst['values'])
+        return json_inst
+            
     def update_room_name(self, room_id, room_description):
         """
         修改房间名称
@@ -304,9 +379,9 @@ if __name__ == '__main__':
     temp = DbOperator(host, db_name, user, password)
     temp.test_connection()
     
-    for i in range(10):
-        temp.insert_data(2, datetime.now().strftime('%Y-%m-%d'), 12.0, 12.1, 12.2, 12.3)
-        print "now is instance: %d" %i
+#     for i in range(10):
+#         temp.insert_data(2, datetime.now().strftime('%Y-%m-%d'), 12.0, 12.1, 12.2, 12.3)
+#         print "now is instance: %d" %i
      
 #     print temp.get_room_info(1) 
 #     print temp.get_all_room()
@@ -356,4 +431,8 @@ if __name__ == '__main__':
 #       
 #     
 #     temp.transfor_absolute_time('2000-1-1 1:1:0')
+
+    print temp.get_latest_data(1)
+    
+    print temp.certain_sensor_time_range_data(113, '2014-03-31 09:56:01.000', '2014-03-31 09:56:31.000')
     

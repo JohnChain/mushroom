@@ -255,10 +255,10 @@ def deal_update_controller_state_response(proto_inst, fileno):
     response_code.ParseFromString(proto_inst['data'])
     header_inst = proto_inst['header_inst']
     
-    print django_client_dic.keys()
+#     print django_client_dic.keys()
     
-    print header_inst
-    print response_code
+#     print header_inst
+#     print response_code
     
     log_msg = 'From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- '
     log_handler.communication(log_msg)
@@ -336,6 +336,8 @@ def deal_read_sensor_data_response(proto_inst, fileno):
     sensor_data = SensorData()
     sensor_data.ParseFromString(proto_inst['data'])
     
+    
+    
     message_header = proto_inst['header_inst']
 
     log_msg = 'From ARM READ_SENSOR_DATA_RESPONSE -- '
@@ -371,35 +373,44 @@ def deal_read_sensor_data_response(proto_inst, fileno):
         if  data[TEMP].value < threshold[room_id][0][2]:
             log_msg = "it is too cold, please worm me up!"
             #TODO:
-#             update_controller_state(db_inst.controller_dict[sensor_data.room][0], 1, fileno)
+            update_controller_state(1, ON, fileno)
         elif data[TEMP].value > threshold[room_id][0][3]:
             log_msg = 'it is too hot, please cool me down!'
+            update_controller_state(2, OFF, fileno)
         else:
             log_msg = 'Hemperature is OK'
         log_handler.communication(log_msg)
 
         if  data[HUMI].value < threshold[room_id][0][4]:
             log_msg = 'it is too dry, please give me some water!'
+            update_controller_state(3, ON, fileno)
         elif data[HUMI].value > threshold[room_id][0][5]:
             log_msg = 'it is too humid, please dry me up!'
+            update_controller_state(4, OFF, fileno)
         else:
             log_msg = 'Humidity is OK'
         log_handler.communication(log_msg)
 
         if  data[CO2].value < threshold[room_id][0][6]:
             log_msg = 'it is co2-less, please give me some co2!'
+            update_controller_state(5, ON, fileno)
         elif data[CO2].value > threshold[room_id][0][7]:
             log_msg = 'it is co2-ful, please give me some fresh air!'
+            update_controller_state(6, OFF, fileno)
         else:
             log_msg = 'CO2 is OK'
         log_handler.communication(log_msg)
 
-        if data[LIGHT].value != threshold[room_id][0][8]:
-            log_msg = 'it is time to change light to %s' %(threshold[room_id][0][8])
+        if data[LIGHT].value < threshold[room_id][0][9]:
+            log_msg = 'it is too bright, please dark me down !'
+            update_controller_state(7, ON, fileno)
+        elif data[LIGHT].value > threshold[room_id][0][10]:
+            log_msg = 'it is too dark, please turn lights on !'
+            update_controller_state(8, OFF, fileno)
         else:
-            log_msg = 'light is OK'
+            log_msg = 'brightness is OK'
         
-        log_handler.communication(log_msg)    
+        log_handler.communication(log_msg)
     else:
         print 'thresholds not ready yet'
 #     read_sensor_data(room_id, fileno)
@@ -421,6 +432,9 @@ def init_sync(proto_inst, fileno):
     conf_init = Init()
     conf_init.ParseFromString(proto_inst['data'])
     message_header = proto_inst['header_inst']
+
+#     log_msg = str(conf_init)
+#     log_handler.debug(log_msg)
 
     log_msg = 'From ARM INIT -- '
     log_handler.communication(log_msg)
@@ -523,3 +537,8 @@ body_dict = {
     1: arm_protocal1,
     }
     
+    
+    
+#     
+# b4 d3 d7 d6 b7 fb b4 ae d7 aa bb bb c8 d5 c6 da ba cd/ bb f2 
+# ca b1 bc e4 ca b1 a3 ac d7 aa bb bb ca a7 b0 dc a1 a3

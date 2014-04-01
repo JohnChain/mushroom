@@ -17,6 +17,9 @@ def load_threshold(stopEvent, param, ):
 #     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
     db_inst = MssqlConnection()
+    
+    db_inst.transfor_absolute_time('2014-03-31 10:30:00.000')
+    
     db_inst.connect()
     room_dupe = db_inst.queryAll('select distinct room_id from vw_task')
     room_list = []
@@ -32,6 +35,9 @@ def load_threshold(stopEvent, param, ):
         else:
             threshold[room_id][0] = temp[0]
             threshold[room_id][1] = (temp[0][0],str(temp[0][1]))
+        
+        log_msg = 'Load Threshold of Room_id : %d \n %s' %(room_id, str(threshold[room_id][0]))
+        log_handler.work(log_msg)
 #         log_msg = '[ Load Threshold ] Load Threshold of Room_id : %d ' %(room_id)
 #         log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 #         print log_msg
