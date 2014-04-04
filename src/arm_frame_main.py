@@ -44,10 +44,6 @@ class ArmFrameMain():
             # 分发数据
             result = servant.dispatch(protobuf_inst, self.client.fileno())
             return result
-#             if result == SUC:
-#                 return SUC
-#             else:
-#                 return result
         else:
             now_time = datetime.now()
             gap = (now_time - self.client.last_time).seconds

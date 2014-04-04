@@ -246,7 +246,7 @@ class Logger():
         self.debug_log = logging.getLogger('DEBUG')
         self.debug_log.setLevel(logging.DEBUG)
         
-        fmt = logging.Formatter('[%(asctime)s] [Level = %(levelname)s] [ThreadName = %(threadName)s] [ThreadID = %(thread)d] -- %(message)s', '%Y-%m-%d %H:%M:%S')
+        fmt = logging.Formatter('[%(asctime)s] [Level = %(levelname)s] [ThreadName = %(threadName)s] -- %(message)s', '%Y-%m-%d %H:%M:%S')
 
         #设置CMD日志
         sh = logging.StreamHandler()

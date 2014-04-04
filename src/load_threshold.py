@@ -18,13 +18,14 @@ def load_threshold(stopEvent, param, ):
 
     db_inst = MssqlConnection()
     
+    #TODO: translate 起始时间的选取
     db_inst.transfor_absolute_time('2014-03-31 10:30:00.000')
     
     db_inst.connect()
-    room_dupe = db_inst.queryAll('select distinct room_id from vw_task')
-    room_list = []
+    room_dupe = db_inst.queryAll('select distinct room_id, policy_instance_id from vw_task')
+    room2policy_instance = {}
     for i in room_dupe:
-        room_list.append(i[0])
+        room2policy_instance[i[0]] = i[1]
     db_inst.close()
 
     def load(room_id, threshold):
@@ -32,26 +33,30 @@ def load_threshold(stopEvent, param, ):
         if len(temp) == 2:
             threshold[room_id][0] = temp[0]
             threshold[room_id][1] = (temp[1][0],str(temp[1][1]))
-        else:
+            log_msg = 'Load Threshold of Room_id : %d \n%s' %(room_id, str(threshold[room_id][0]))
+        elif len(temp) == 1:
             threshold[room_id][0] = temp[0]
             threshold[room_id][1] = (temp[0][0],str(temp[0][1]))
-        
-        log_msg = 'Load Threshold of Room_id : %d \n %s' %(room_id, str(threshold[room_id][0]))
+            # 将该roomID所对应的policy_instance的状态设置为 OLD
+            db_inst.update_policy_instance_state(room2policy_instance[room_id], POLICY_OLD)
+            log_msg = 'Policy in Room: %d Complete, Last Threshold : \n%s' %(room_id, str(threshold[room_id][0]))
+        else:
+            # 将该roomID所对应的policy_instance的状态设置为 OLD
+            # 将该roomID从room2policy_instance字典中删除
+            db_inst.update_policy_instance_state(room2policy_instance[room_id], POLICY_OLD)
+            room2policy_instance.pop(room_id)
+            log_msg = 'There is no new policy in room %d' %room_id
+            pass
         log_handler.work(log_msg)
-#         log_msg = '[ Load Threshold ] Load Threshold of Room_id : %d ' %(room_id)
-#         log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
-#         print log_msg
-#         print threshold[room_id][0]
-#         print threshold[room_id][1]
-#         print '================================================'
 
-    for room_id in room_list:
+    # 系统启动后首次载入环境限制
+    for room_id in room2policy_instance.keys():
         if not threshold.has_key(room_id):
-            threshold[room_id] = [(), (room_id, '1-1-1 1:1:1')]
+            threshold[room_id] = [(), (room_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))]
             load(room_id, threshold)
 
     def timer_work():
-        for room_id in room_list:
+        for room_id in room2policy_instance.keys():
             if threshold[room_id][1][1] < str(datetime.now()):
                 load(room_id, threshold)
 

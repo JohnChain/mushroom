@@ -25,10 +25,10 @@ class Task():
     def gene_id(self):
         GlobalTaskId.lock.acquire()
         #:任务ID
-        self.id = GlobalTaskId.global_task_id
-        GlobalTaskId.global_task_id += 1
         if GlobalTaskId.global_task_id > MAX_TASK_ID:
             GlobalTaskId.global_task_id = 0
+        self.id = GlobalTaskId.global_task_id
+        GlobalTaskId.global_task_id += 1
         GlobalTaskId.lock.release()
         
 class TaskList():

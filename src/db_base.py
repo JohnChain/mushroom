@@ -113,6 +113,7 @@ class MssqlConnection:
             log_msg = str(e)
             log_handler.error(log_msg)
             return ERR
+        
     def load_table(self):
         """
         将数据库中部分表加载到内存
@@ -155,7 +156,7 @@ class MssqlConnection:
         finally:
             self.close()
     
-    def transfor_absolute_time(self, start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")):
+    def transfor_absolute_time(self, state = POLICY_RUNNING):
         """
         将执行策略的相对时间转换为绝对时间
         
@@ -165,7 +166,7 @@ class MssqlConnection:
         self.connect()
         self.executeDML("delete from tb_absolute_time")
         instance_list = []
-        sql_str = "select * from tb_policy_instance where start_time >= '%s'" %(start_time)
+        sql_str = "select * from tb_policy_instance where state >= '%s'" %(state)
         policy_instance_list=self.queryAll(sql_str)
         
         for i in policy_instance_list:
@@ -178,9 +179,6 @@ class MssqlConnection:
             instance_list.append(temp)
         
         for i in instance_list:
-#             print '\n======================================='
-#             print 'instance_id = ', i.instance_id, 'policy_id = ', i.policy_id, 'start_time = ', i.start_time
-#             print '======================================='
             sql_str = u""" 
                         select rule_id, interval_date, hours from tb_rule
                         where policy_id = %d
@@ -198,10 +196,7 @@ class MssqlConnection:
                 aaa.change_time = change_time
                 absolute_time_list.append(aaa)
             for j in absolute_time_list:
-#                 print 'instance_id = ', j.instance_id, 'rule_id = ', j.rule_id, 'change_time = ', j.change_time
-#                 print '---------------------------'
                 sql_str = "insert into tb_absolute_time(rule_id, policy_instance_id, change_time) values(%d, %d, '%s')" %(j.rule_id, j.instance_id, j.change_time)
-#                 print sql_str
                 try:
                     self.executeDML(sql_str)
                 except pyodbc.IntegrityError, e:
@@ -221,20 +216,31 @@ class MssqlConnection:
         :param state: 传感器当前状态
         :rtype: SUC 成功， FAI 失败， ERR 异常
         """
-#         sql_str = '''insert into tb_sensor(sensor_id, sensor_type, room_id, position, state) 
-#                     values(%d, '%s', %d, '%s', %d)''' %(sensor_id, sensor_type, room_id, position, state)
-        #TODO: update
-        sql_str = '''update tb_sense'''
+        sql_insert = '''insert into tb_sensor(sensor_id, sensor_type, room_id, position, state) 
+                    values(%d, '%s', %d, '%s', %d)''' %(sensor_id, sensor_type, room_id, position, state)
+        sql_update = '''update tb_sense
+                        set sensor_type = '%s',
+                        set room_id = %d,
+                        set position = %s, 
+                        set state = %d
+                        where sensor_id = %d
+                    ''' %(sensor_type, room_id, position, state, sensor_id)
         try:
             self.connect()
-            self.executeDML(sql_str)
-            self.close()
+            self.executeDML(sql_insert)
             return SUC
-        except Exception,e:
-            log_msg = 'in insert_sensor' + str(e)
-            log_handler.debug(log_msg)
-            
-            return FAI
+        except Exception,err:
+            try:
+                self.connect()
+                self.executeDML(sql_update)
+                return SUC
+            except Exception, e:
+                log_msg = 'Init Sensor Failed'
+                log_handler.error(log_msg)
+                log_msg = 'Init Sensor Failed: \n%s' %str(e)
+                return ERR
+        finally:
+            self.close()
     
     def insert_controller(self, controller_id, controller_type, room_id, state = OFF):
         """
@@ -329,7 +335,7 @@ class MssqlConnection:
             print e
             return -1
             
-    def create_policy_instance(self, policy_id, plant_name, room_id, start_time, state = 2):
+    def create_policy_instance(self, policy_id, plant_name, room_id, start_time, state = POLICY_NEW):
         """
         创建新的策略实例
         
@@ -360,8 +366,25 @@ class MssqlConnection:
             print e
             return -1
     
+    def update_policy_instance_state(self, policy_instance_id, state):
+        """
+        更改策略实例状态
+        
+        :param policy_instance_id: 策略号
+        :param state: 状态 
+        :rtype: 【尚无】
+        """
+        sql_str = '''
+                    update tb_policy_instance
+                    set state = %d
+                    where policy_instance_id = %d 
+                ''' %(state, policy_instance_id)
+        self.connect()        
+        self.executeDML(sql_str)
+        self.close()
+        
     def create_rule(self, policy_id, interval_date, hours, temperature_peak, temperature_valle, 
-                    humidity_peak, humidity_valle, co2_peak, co2_valle, light_color):
+                    humidity_peak, humidity_valle, co2_peak, co2_valle, brightness_peak, brightness_valle, light_color = ''):
         """
         插入养殖模式
         
@@ -379,10 +402,10 @@ class MssqlConnection:
         """
         self.connect()
         sql_str = u'''insert into tb_rule(policy_id, interval_date, hours, temperature_peak, temperature_valle,
-        humidity_peak, humidity_valle, co2_peak, co2_valle, light_color)
+        humidity_peak, humidity_valle, co2_peak, co2_valle, reserved1_peak, reserved1_valle)
         values( %d, %d, %d, %f, %f, %f, %f, %f, %f, '%s')''' \
         %(policy_id, interval_date, hours, temperature_peak, temperature_valle,\
-          humidity_peak, humidity_valle, co2_peak, co2_valle, light_color)
+          humidity_peak, humidity_valle, co2_peak, co2_valle, brightness_peak, brightness_valle)
         self.executeDML(sql_str)
         self.close()
         
@@ -429,7 +452,7 @@ class MssqlConnection:
                             temperature_valle, temperature_peak,
                             humidity_valle, humidity_peak, 
                             co2_valle, co2_peak, 
-                            light_color, reserved1_valle, reserved1_peak 
+                            light_color, reserved1_valle, reserved1_peak, policy_instance_id
                 from vw_task
                 where change_time >= '%s' and room_id = %d
                 order by change_time

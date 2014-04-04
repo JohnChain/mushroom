@@ -101,8 +101,6 @@ def deal_update_time_response(proto_inst, fileno):
     
     log_handler.communication(log_msg)
     
-#     read_controller_state(1, fileno)
-    
     return result
 
 #===================================================================================
@@ -211,8 +209,6 @@ def deal_read_controller_state_response(proto_inst, fileno):
         log_msg = 'To django view device response -- head: %s, version: %d, data: %s' %(head, version, json.dumps(json_inst))
         log_handler.communication(log_msg)
     
-#     update_controller_state(proto_data.controller_id, ON, fileno)
-    
     return SUC
         
 def update_controller_state(controller_id, state, fileno):
@@ -254,11 +250,6 @@ def deal_update_controller_state_response(proto_inst, fileno):
     response_code = ResponseCode()
     response_code.ParseFromString(proto_inst['data'])
     header_inst = proto_inst['header_inst']
-    
-#     print django_client_dic.keys()
-    
-#     print header_inst
-#     print response_code
     
     log_msg = 'From ARM UPDATE_CONTROLLER_STATE_RESPONSE -- '
     log_handler.communication(log_msg)
@@ -309,7 +300,6 @@ def deal_update_controller_state_response(proto_inst, fileno):
         message_to_dj = gene_django_frame(head, version, json_inst)
         dj_handler.handler.send(message_to_dj)
         
-#     read_sensor_data(1, fileno)
         return result
     log_msg = 'header_inst.source not found'
     log_handler.debug(log_msg)
@@ -335,8 +325,6 @@ def read_sensor_data(room_id, fileno):
 def deal_read_sensor_data_response(proto_inst, fileno):
     sensor_data = SensorData()
     sensor_data.ParseFromString(proto_inst['data'])
-    
-    
     
     message_header = proto_inst['header_inst']
 
@@ -413,7 +401,6 @@ def deal_read_sensor_data_response(proto_inst, fileno):
         log_handler.communication(log_msg)
     else:
         print 'thresholds not ready yet'
-#     read_sensor_data(room_id, fileno)
     
 def deal_sensor_data_push(proto_inst, fileno):
     #TODO: 同 deal_read_sensor_data_response
@@ -537,8 +524,3 @@ body_dict = {
     1: arm_protocal1,
     }
     
-    
-    
-#     
-# b4 d3 d7 d6 b7 fb b4 ae d7 aa bb bb c8 d5 c6 da ba cd/ bb f2 
-# ca b1 bc e4 ca b1 a3 ac d7 aa bb bb ca a7 b0 dc a1 a3

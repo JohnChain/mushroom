@@ -1,40 +1,42 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 import sys
 import json
 import Queue
 import ctypes
 import select
 import socket
-import pyodbc
 import logging
 import threading
-from time import *
-from datetime import *
+from time import sleep
+from datetime import datetime
 from threading import Event, Timer
 from signal import signal, SIGINT
 from binascii import a2b_hex, b2a_hex
 
-from mushroom_pb2 import *
-
-sensor_type_dict = {
-               TEMP : 'temperature',
-               LIGHT: 'light',
-               HUMI : 'humidity',
-               CO2  : 'co2',
-        }
-
-controller_type_dict = {
-                   XUNHUAN_FAN  : 'xunhuan_fan',
-                   JINFENG_FAN  : 'jinfeng_fan',
-                   PAIFENG_FAN  : 'paifeng_fan',
-                   JIASHIQI     : 'jiashiqi',
-                   YASUOJI      : 'yasuoji',
-                   NEIJI        : 'neiji',
-                   YELLOW_LIGHT : 'yello_light',
-                   RED_LIGHT    : 'red_light',
-                   BLUE_LIGHT   : 'blue_light',
-        }
+try:
+    from mushroom_pb2 import *
+    sensor_type_dict = {
+                   TEMP : 'temperature',
+                   LIGHT: 'light',
+                   HUMI : 'humidity',
+                   CO2  : 'co2',
+            }
+    
+    controller_type_dict = {
+                       XUNHUAN_FAN  : 'xunhuan_fan',
+                       JINFENG_FAN  : 'jinfeng_fan',
+                       PAIFENG_FAN  : 'paifeng_fan',
+                       JIASHIQI     : 'jiashiqi',
+                       YASUOJI      : 'yasuoji',
+                       NEIJI        : 'neiji',
+                       YELLOW_LIGHT : 'yello_light',
+                       RED_LIGHT    : 'red_light',
+                       BLUE_LIGHT   : 'blue_light',
+            }
+except Exception:
+    pass
 
 sys_config_dict = {
               'TIME_SYNC_CYCLE' : 50,
@@ -71,16 +73,17 @@ django_client_dic = {}
 #============任务队列模块配置==============#
 #: 任务超时时长（s）
 TASK_TIMEOUT = 5
+#:最大任务号
+MAX_TASK_ID = 99999
+# 任务线程条件变量等待周期
+TASK_WAIT_CIRCLE = 1
 #:任务就绪状态
+
 TASK_READY = 0
 #:任务等待状态
 TASK_WAITING = 1
 #:任务完成状态
 TASK_FINISHED = 2
-#:最大任务号
-MAX_TASK_ID = 99999
-# 任务线程条件变量等待周期
-TASK_WAIT_CIRCLE = 1
 
 #============套接字队列模块配置=============#
 #: select 超时时间
@@ -88,20 +91,21 @@ SELECT_TIMEOUT = 2
 #: 僵尸套接字连接判断时间
 SOCKET_TIMEOUT = 10
 #: 对 ARM 提供链接服务的地址及端口
-# ARM_SERVER_ADDR = ('127.0.0.1', 10001)
 ARM_SERVER_ADDR = ('10.18.50.66', 9000)
 #: 对 Django 提供链接服务的地址及端口 
-# DJANGO_SERVER_ADDR = ('127.0.0.1', 10002)
 DJANGO_SERVER_ADDR = ('10.18.50.66', 9001)
 
 #: 方向，本系统中包括 ARM 和 Django
-# from mesgtype_pb2 import *
-# BIRTH_TYPE_DJANGO   = MANUAL
-# BIRTH_TYPE_ARM      = AUTO
 BIRTH_TYPE_MANUAL    = 0
 BIRTH_TYPE_AUTO      = 1
 
 #==============数据库模块配置=============#
+try:
+    import pyodbc
+except Exception:
+    print "pyodbc not installed, please install it first"
+    sys.exit()
+    
 #: 数据库连接参数
 db_conn_info = {
     "HOST"      : "10.18.50.66",
@@ -111,29 +115,35 @@ db_conn_info = {
     "DATABASE"  : "mushroom",
     }
 
+POLICY_NEW      = 2
+POLICY_RUNNING  = 1
+POLICY_OLD      = 0
+
 #=============日志模块配置===============#
 #: 日志配置参数
 log_conf = {
     'ERROR'           : ON,
     'COMMUNICATION'   : ON,
-    'DEBUG'           : ON,
+    'DEBUG'           : OFF,
     'WORK'            : ON,
     }
 
 log_file = {
-            'ERROR' : 'E:\workspace\mushroom\log\error.txt',
-            'COMMUNICATION' : 'E:\workspace\mushroom\log\communication.txt',
-            'WORK'  : 'E:\workspace\mushroom\log\work.txt',
-            'DEBUG' : 'E:\workspace\mushroom\log\debug.txt',
+            'ERROR' : '..\log\error.txt',
+            'COMMUNICATION' : '..\log\communication.txt',
+            'WORK'  : '..\log\work.txt',
+            'DEBUG' : '..\log\debug.txt',
             }
 
 LOG_TIMER_CYCLE = 1
 
-from log_manager import Logger
 #: 全局日志管理器
-# log_manager = LogManager()
-log_handler = Logger('', )
-
+try:
+    from log_manager import Logger
+    # log_manager = LogManager()
+    log_handler = Logger('', )
+except Exception:
+    pass
 #=============通信协议模块配置===============#
 #----- 控制端——>数据层 -------#
 #: 数据包头标志
@@ -149,7 +159,7 @@ A_pkg_byte = 3
 #: 业务层消息头占字节数
 A_header_byte = 3
 #收数据超时
-RECV_TIMEOUT = 3    
+RECV_TIMEOUT = 3
 
 #: 与Django通信消息包的头标志
 D_HEAD = 'MUSHROOM'
@@ -159,24 +169,3 @@ D_VERSION = 1
 D_version_byte = 1
 #: 业务层消息头占字节数
 D_lenght_byte = 4
-
-
-# #: 控制命令取值
-# ctrl_cmd = {
-#             'ON' : '1',
-#             'OFF': '0',
-#             }
-# 
-# # ------ 数据层 ——> 控制层 ---------#
-# 
-# #: 控制器设置结果
-# ctrl_result = {
-#              'SUCCESS'  : '0',
-#              'FAIL'     : '1',
-#              }
-# #: 控制器状态检测结果
-# check_state_result = {
-#               'ON' : '1',
-#               'OFF': '0',
-#                       }
-

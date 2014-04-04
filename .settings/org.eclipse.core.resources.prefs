@@ -8,6 +8,7 @@ encoding//src/db_operator.py=utf-8
 encoding//src/django_frame_main.py=utf-8
 encoding//src/django_frame_solution.py=utf-8
 encoding//src/django_protocal.py=utf-8
+encoding//src/env_init.py=utf-8
 encoding//src/head.py=utf-8
 encoding//src/load_threshold.py=utf-8
 encoding//src/log_manager.py=utf-8

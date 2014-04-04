@@ -10,6 +10,12 @@ class DbOperator(MssqlConnection):
         MssqlConnection.__init__(self, serverIp, dbName, uid, pwd)
     
     def get_latest_data(self, room_id):
+        """
+        通过房间ID查询实时的数据
+        
+        :param room_id: 传感器ID
+        :rtype: json格式化字典
+        """
         sql_str = "select top 1 instance_id, sense_time, room_id from tb_instance where room_id = %d order by instance_id desc " %(room_id)
         self.connect()
         result = self.queryAll(sql_str)
@@ -43,7 +49,6 @@ class DbOperator(MssqlConnection):
         
         return json_inst
  
-    
     def get_room_info(self, room_id):
         """
         通过Room ID获取房间信息
@@ -53,39 +58,24 @@ class DbOperator(MssqlConnection):
         """
         plant_dict = {}
         self.connect()
-        sql_str = u'''select top 1 %d, room_description, tb_plant.plant_id, plant_name from 
-        tb_policy_instance left join tb_plant on tb_policy_instance.plant_id = tb_plant.plant_id, tb_room
-        where tb_policy_instance.policy_instance_id in (select distinct policy_instance_id from tb_absolute_time) 
-            and tb_room.room_id = %d and state >= 1''' %(room_id, room_id)
+        sql_str = u'''select top 1 tb_room.room_id, room_description, tb_plant.plant_id, plant_name, policy_id from 
+                            tb_policy_instance left join tb_plant 
+                            on tb_policy_instance.plant_id = tb_plant.plant_id, tb_room
+                      where tb_policy_instance.policy_instance_id in (select distinct policy_instance_id from tb_absolute_time) 
+                            and tb_room.room_id = %d and state >= %d''' %(room_id, POLICY_RUNNING)
         # 这里有一个问题，当用户向tb_policy_instance表中一次添加了多个（>=2）个同房间不同开始时间的policy_instance时，
         # 理论上是可以的，但这时就会有上述的查询返回多组，其中只有一组是正在执行的，其他的均为当前执行周期结束后才执行的新的周期。
         plant_room = self.queryAll(sql_str)
-        
-        sql_str = u'''
-                    select top 1 temperature, humidity, co2, light, tb_instance.sense_time from 
-                    vw_data left join tb_instance on vw_data.instance_id = tb_instance.instance_id
-                    where room_id = %d order by tb_instance.sense_time desc
-                    ''' %(room_id)
-        data = self.queryAll(sql_str)
         self.close()
         try:
             plant_dict['roomId']    = plant_room[0][0]
             plant_dict['roomName']  = plant_room[0][1]
             plant_dict['plantId']   = plant_room[0][2]
             plant_dict['plantName'] = plant_room[0][3]
-            plant_dict['sensors'] = {}
-            plant_dict['sensors']['temperature']    = data[0][0] 
-            plant_dict['sensors']['humidity']       = data[0][1] 
-            plant_dict['sensors']['co2']            = data[0][2] 
-            plant_dict['sensors']['brightness']     = data[0][3]
-            plant_dict['time']                      = data[0][4].strftime('%Y/%m/%d %H:%M:%S')
+            plant_dict['nowPolicy'] = plant_room[0][4]
         except IndexError, e:
             print 'get nothing in room_id: %d' %room_id
-            # 有的房间没有实时数据，此时sensor字典为空
-            pass
         return plant_dict
-    
-#     def get_room_info_1(self, room_id):
     
     def get_all_room(self):
         """
@@ -117,7 +107,7 @@ class DbOperator(MssqlConnection):
         sql_str = u'''
                     select tb_temp.sensor_id, tb_sensor.sensor_type, position, sense_time, data from 
                     (select sensor_id, sense_time, data 
-                        from tb_instance left join tb_data on tb_instance.instance_id = tb_data.instance_id
+                        from tb_data left join tb_instance on tb_instance.instance_id = tb_data.instance_id
                             where sense_time >= '%s' and sense_time < '%s' and room_id = %d) as tb_temp
                     left join tb_sensor on tb_temp.sensor_id = tb_sensor.sensor_id
                     order by sensor_id, sense_time
@@ -126,23 +116,17 @@ class DbOperator(MssqlConnection):
         self.connect()
         data = self.queryAll(sql_str)
         self.close()
-        temp_dict = {}
-        for i in data:
-            if temp_dict.has_key(i[0]):
-                temp_dict[i[0]]['value'].append((i[3], i[4]))
-            else:
-                temp = {}
-                temp['sensorId'] = i[0]
-                temp['sensorName'] = i[1]
-                temp['position'] = i[2]
-                temp['value'] = [(i[3], i[4])]
-                temp_dict[i[0]] = temp
+        temp = {}
+        temp['sensorId'] = data[0][0]
+        temp['sensorName'] = data[0][1]
+        temp['position'] = data[0][2]
+        
         data_list = []
-        for v in temp_dict.itervalues():
-            v['value'] = tuple(v['value'])
-            data_list.append(v)
+        for i in data:
+            data_list.append((i[3].strftime('%Y/%m/%d %H:%M:%S'), i[4]))
+        temp['values'] = tuple(data_list)
 
-        return data_list
+        return temp
 
     def certain_sensor_time_range_data(self, sensor_id, start_time, end_time):
         """
@@ -252,7 +236,7 @@ class DbOperator(MssqlConnection):
         sql_str = u'''
                 select description, interval_date, hours, 
                 temperature_peak, temperature_valle, humidity_peak, humidity_valle,
-                co2_peak, co2_valle, light_color  
+                co2_peak, co2_valle, reserved1_peak, reserved1_valle  
                 from tb_rule left join tb_policy 
                 on tb_rule.policy_id = tb_policy.policy_id
                 where tb_policy.policy_id = %d 
@@ -276,7 +260,8 @@ class DbOperator(MssqlConnection):
             temp['temperature'] = (i[3], i[4])
             temp['humidity']    = (i[5], i[6])
             temp['co2']         = (i[7], i[8])
-            temp['light']       = i[9]
+            temp['brightness']  = (i[9], i[10])
+            temp['light']       = ''
             policy_info['policy'].append(temp)
             
         return policy_info 
@@ -304,7 +289,8 @@ class DbOperator(MssqlConnection):
             temp['temperature'] = (i[1], i[2])
             temp['humidity']    = (i[3], i[4])
             temp['co2']         = (i[5], i[6])
-            temp['light']       = i[7]
+            temp['brightness']  = (i[7], i[8])
+            temp['light']       = ''
             current_policy.append(temp)
             
         return current_policy
@@ -318,9 +304,7 @@ class DbOperator(MssqlConnection):
         :rtype: 新建结果，code: 0 成功， -1 失败
         """
         policy_id = self.create_policy(dict['description'])
-#         print 'policy_id = %d' %policy_id
         instance_id = self.create_policy_instance(policy_id, dict['plantName'], dict['roomId'], dict['startAt'])
-#         print 'instance_id = %d ' %instance_id
         for i in range(len(dict['policy'])):
             result = self.create_rule(policy_id, \
                          dict['policy'][i]['date'], \
@@ -331,8 +315,8 @@ class DbOperator(MssqlConnection):
                          dict['policy'][i]['humidity'][0], \
                          dict['policy'][i]['co2'][1], \
                          dict['policy'][i]['co2'][0], \
-                         dict['policy'][i]['lightColor'])
-#         print 'result = %d' %result
+                         dict['policy'][i]['brightness'][1],\
+                         dict['policy'][i]['brightness'][0])
         if policy_id >= 0 and instance_id >= 0 and result >= 0:
             return {'code': 0, 'definition': 'Successful'}, policy_id
         else:
@@ -364,7 +348,6 @@ class DbOperator(MssqlConnection):
         :rtype: 删除结果， code: 0 成功， -1 失败
         """
         self.connect()
-#         self.executeDML(u"select policy_instance_id from ")
 #         self.executeDML(u'delete from tb_policy_instance where policy_id = %d' %(policy_id))
 #         self.executeDML(u'delete from tb_rule where policy_id = %d' %(policy_id))
         self.executeDML(u'delete from tb_policy where policy_id = %d' %(policy_id))
@@ -386,7 +369,7 @@ if __name__ == '__main__':
 #     print temp.get_room_info(1) 
 #     print temp.get_all_room()
 #      
-#     print len(temp.get_time_reange_data(2, '2013-12-24 0:0:0', '2013-12-25 0:0:0'))
+    print temp.get_time_reange_data(1, '2014/03/31 09:56:01.000', '2014/04/04 09:56:31.000')
 #     print temp.all_policy_info()
 #     print temp.get_policy(1)
 #     print temp.current_policy(1)
@@ -432,7 +415,8 @@ if __name__ == '__main__':
 #     
 #     temp.transfor_absolute_time('2000-1-1 1:1:0')
 
-    print temp.get_latest_data(1)
+#     print temp.get_latest_data(1)
+#     
+#     print temp.certain_sensor_time_range_data(129, '2014/03/31 09:56:01.000', '2014/03/31 09:56:31.000')
     
-    print temp.certain_sensor_time_range_data(113, '2014-03-31 09:56:01.000', '2014-03-31 09:56:31.000')
-    
+#     print temp.get_all_room()

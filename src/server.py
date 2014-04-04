@@ -7,6 +7,7 @@ from arm_frame_main import ArmFrameMain
 from django_frame_main import DjangoFrameMain
 from task_deliver import TaskDeliver
 from load_threshold import load_threshold
+from env_init import read_config
 
 def handler(signal, frame):
     print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
@@ -34,11 +35,9 @@ def main():
     :rtype: 0
     """
     log_msg = 'Start From Main Function'
-#     log_manager_thread = MyThread('log_manager', log_manager.record_thread_main, '')
-#     log_manager_thread.start()
-#     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
-    
     log_handler.work(log_msg)
+    
+    read_config()
     
     temp_task = TaskDeliver()
     task_deliver = MyThread('task_deliver', temp_task.core, ('', ))
@@ -62,7 +61,6 @@ def main():
     thread_list.append(ram_server)
     thread_list.append(django_server)
     thread_list.append(threshold_loader)
-#     thread_list.append(log_manager_thread)
     
     signal(SIGINT, handler)
     try:
