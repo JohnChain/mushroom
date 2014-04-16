@@ -39,11 +39,17 @@ sys_config_viewer = {
              }
 }
 
+instance_updated = {
+   "uri": "policy/now/update",
+   "type": "request",
+   }
+
 
 device_controller_frame = gene_django_frame(D_HEAD, D_VERSION, device_controller)
 device_viewer_frame     = gene_django_frame(D_HEAD, D_VERSION, device_viewer)
 log_viewer_frame        = gene_django_frame(D_HEAD, D_VERSION, log_viewer)
 sys_config_viewer_frame = gene_django_frame(D_HEAD, D_VERSION, sys_config_viewer)
+instance_updated_frame  = gene_django_frame(D_HEAD, D_VERSION, instance_updated)
 
 if __name__ == '__main__':
     print device_controller_frame

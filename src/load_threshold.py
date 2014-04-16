@@ -8,65 +8,74 @@ def load_threshold(stopEvent, param, ):
     """
     从数据库中载入环境限制范围
 
-    :param param:
     :param stopEven:
+    :param param:
     :rtype:
     """
     log_msg = 'Thread Load Threshold is Ready ...'
     log_handler.work(log_msg)
-#     log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
 
     db_inst = MssqlConnection()
     
-    #TODO: translate 起始时间的选取
-    db_inst.transfor_absolute_time('2014-03-31 10:30:00.000')
-    
-    db_inst.connect()
-    room_dupe = db_inst.queryAll('select distinct room_id, policy_instance_id from vw_task')
-    room2policy_instance = {}
-    for i in room_dupe:
-        room2policy_instance[i[0]] = i[1]
-    db_inst.close()
+    db_inst.transfor_absolute_time()
 
     def load(room_id, threshold):
-        temp = db_inst.get_threshold(room_id, threshold[room_id][1][1])
+        str_time = threshold[room_id][1][1].strftime("%Y-%m-%d %H:%M:%S")
+        temp = db_inst.get_threshold(room_id, str_time)
+        log_msg = str(temp)
+        log_handler.error(log_msg)
         if len(temp) == 2:
+            # 当前策略尚未执行完
+            print 'here in len = 2'
             threshold[room_id][0] = temp[0]
-            threshold[room_id][1] = (temp[1][0],str(temp[1][1]))
+            threshold[room_id][1] = (temp[1][0],temp[1][1])
             log_msg = 'Load Threshold of Room_id : %d \n%s' %(room_id, str(threshold[room_id][0]))
         elif len(temp) == 1:
+            print 'here in len = 1'
+            # 已执行至当前策略最后一条规则
             threshold[room_id][0] = temp[0]
-            threshold[room_id][1] = (temp[0][0],str(temp[0][1]))
-            # 将该roomID所对应的policy_instance的状态设置为 OLD
-            db_inst.update_policy_instance_state(room2policy_instance[room_id], POLICY_OLD)
-            log_msg = 'Policy in Room: %d Complete, Last Threshold : \n%s' %(room_id, str(threshold[room_id][0]))
+            threshold[room_id][1] = (temp[0][0],temp[0][1])
+            
+            # 确保当前执行策略完整结束
+            if temp[0][1] <= datetime.now():
+                # 将该roomID所对应的policy_instance的状态设置为 OLD
+                db_inst.update_policy_instance_state(room_id, POLICY_OLD)
+                # 检查并载入当前房间的新执行策略
+                db_inst.transfor_room_absolute_time(room_id)
+            
+            log_msg = 'Policy in Room [%d] Complete, Last Threshold : \n%s' %(room_id, str(threshold[room_id][0]))
+            log_handler.debug(log_msg)
         else:
+            # 当前房间无要新策略，均为就策略实例
             # 将该roomID所对应的policy_instance的状态设置为 OLD
             # 将该roomID从room2policy_instance字典中删除
-            db_inst.update_policy_instance_state(room2policy_instance[room_id], POLICY_OLD)
-            room2policy_instance.pop(room_id)
-            log_msg = 'There is no new policy in room %d' %room_id
-            pass
-        log_handler.work(log_msg)
-
-    # 系统启动后首次载入环境限制
-    for room_id in room2policy_instance.keys():
-        if not threshold.has_key(room_id):
-            threshold[room_id] = [(), (room_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))]
-            load(room_id, threshold)
+            print 'here in len = 0'
+            db_inst.update_policy_instance_state(room_id, POLICY_OLD)
+            if db_inst.transfor_room_absolute_time(room_id) == FAI:
+                # 此时后两种情况：1. 无新策略待执行； 2. 有新策略，但规则为空
+                log_msg = 'There is no new policy in room %d currently' %room_id
+                log_handler.debug(log_msg)
+                return FAI
+        print 'current threshold is : %s ' %threshold
 
     def timer_work():
-        for room_id in room2policy_instance.keys():
-            if threshold[room_id][1][1] < str(datetime.now()):
+        for room_id in db_inst.room_dict.keys():
+            if not threshold.has_key(room_id):
+                # 系统启动后首次载入环境限制
+                threshold[room_id] = [(), (room_id, datetime.now())]
                 load(room_id, threshold)
-
+            elif threshold[room_id][1][1] < datetime.now():
+                load(room_id, threshold)
+            
     timer = Timer(THRESHOLD_LOAD_CYCLE, timer_work)
+    timer.setName(THREAD_POLICY)
     timer.start()
     while not stopEvent.isSet():
         if timer.isAlive():
             sleep(0.1)
         else:
             timer = Timer(THRESHOLD_LOAD_CYCLE, timer_work)
+            timer.setName(THREAD_POLICY)
             timer.start()
     timer.cancel()
 
@@ -78,4 +87,9 @@ def load_threshold(stopEvent, param, ):
 
     exit()
 if __name__ == '__main__':
-    load_threshold('')
+    main_event = Event()
+    try:
+        load_threshold(main_event, '')
+    except KeyboardInterrupt:
+        main_event.set()
+        

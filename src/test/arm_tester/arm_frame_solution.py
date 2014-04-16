@@ -95,12 +95,7 @@ class ArmFrameSolution():
         proto_inst = {'header_inst':header_inst, 'data':protobuf_msg_dic['data']}
 
         return proto_inst
-    
-    
-    body_dict = {
-                 1: arm_protocal ,
-                 }
-    
+
     def dispatch(self, proto_inst, birth_fileno):
         """
         解析器
@@ -109,6 +104,9 @@ class ArmFrameSolution():
         :rtype: 【待定】
         """
         message_id = proto_inst['header_inst'].message_id
+        version = -1
         version = proto_inst['header_inst'].version
-        self.body_dict[version][message_id](proto_inst, birth_fileno)
-        return ''
+        
+        log_msg = 'bef dispatch: message_id = %s, version = %s' %(str(message_id), str(version))
+        print log_msg
+        return arm_protocal[message_id](proto_inst, birth_fileno)

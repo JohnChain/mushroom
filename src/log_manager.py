@@ -256,20 +256,32 @@ class Logger():
         #设置文件日志
         work_fh = logging.FileHandler(work_path)
         work_fh.setFormatter(fmt)
-        work_fh.setLevel(logging.INFO)
-
+        if log_conf['WORK'] == ON:
+            work_fh.setLevel(logging.INFO)
+        else:
+            work_fh.setLevel(logging.WARNING)
+            
         communication_fh = logging.FileHandler(communication_path)
         communication_fh.setFormatter(fmt)
-        communication_fh.setLevel(logging.INFO)
+        if log_conf['COMMUNICATION'] == ON:
+            communication_fh.setLevel(logging.INFO)
+        else:
+            communication_fh.setLevel(logging.WARNING)
 
         error_fh = logging.FileHandler(error_path)
         error_fh.setFormatter(fmt)
-        error_fh.setLevel(logging.ERROR)
+        if log_conf['ERROR'] == ON:
+            error_fh.setLevel(logging.ERROR)
+        else:
+            error_fh.setLevel(logging.CRITICAL)
 
         debug_fh = logging.FileHandler(debug_path)
         debug_fh.setFormatter(fmt)
-        debug_fh.setLevel(logging.DEBUG)
-
+        if log_conf['DEBUG'] == ON:
+            debug_fh.setLevel(logging.DEBUG)
+        else:
+            debug_fh.setLevel(logging.INFO)
+            
         self.work_log.addHandler(sh)
         self.communication_log.addHandler(sh)
         self.error_log.addHandler(sh)
@@ -295,7 +307,6 @@ class Logger():
  
     def error(self, msg, color=FOREGROUND_RED):
         set_color(color)
-        
         self.error_log.error(msg)
         set_color(FOREGROUND_WHITE)
 

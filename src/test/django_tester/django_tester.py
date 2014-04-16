@@ -14,14 +14,13 @@ def main():
     print 'connection done...'
 #     django_tester.send(sys_config_viewer_frame)
 #     print django_tester.recv(1024)
-    django_tester.send(device_controller_frame)
-    dj_reciver.main_receivor()
-
-    django_tester.send(device_viewer_frame)
-    dj_reciver.main_receivor()
-
-#     django_tester.send(log_viewer_frame)
+#     django_tester.send(device_controller_frame)
 #     dj_reciver.main_receivor()
+# 
+#     django_tester.send(device_viewer_frame)
+#     dj_reciver.main_receivor()
+    
+    django_tester.send(instance_updated_frame)
 
     django_tester.close()
 if __name__ == '__main__':

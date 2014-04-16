@@ -46,18 +46,6 @@ class DjangoFrameSolution():
         handler.send(frame)
         return len(frame)
 
-    def unpack(self, version, body):
-        """
-        拆包，判断帧头尾正确性，及完成校验任务
-        
-        :param origin_frame: 待解析的原始数据包
-        :rtype: 成功，待反序列化的数据部分，否则返回空字符
-        """
-#         if origin_frame[:8] != D_HEAD:
-#             print 'wrone head'
-#             return ''
-        return body
-    
     def parse(self, json_frame):
         """
         构造器
@@ -84,16 +72,16 @@ class DjangoFrameSolution():
         elif json_inst['uri'] == 'device/viewer':
             if json_inst['type'] == 'request':
                 return device_view(json_inst, client_handler)
-        elif json_inst['uri'] == "log/viewer":
-            if json_inst['type'] == 'request':
-                return log_view(json_inst, client_handler)
         elif json_inst['uri'] == 'config/log':
             if json_inst['type'] == 'request':
                 return log_config(json_inst, client_handler)
-        elif json_inst['type'] == "device/controller/sync":
+        elif json_inst['uri'] == "device/controller/sync":
             pass
+        elif json_inst['uri'] == "policy/now/update":
+            if json_inst['type'] == 'request':
+                return policy_instance_updated(json_inst, client_handler)
         else:
             log_msg = 'Unknow uri'
-            log_handler.debug(log_msg)
+            log_handler.communication(log_msg)
 
             return 0

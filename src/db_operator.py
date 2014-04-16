@@ -167,7 +167,7 @@ class DbOperator(MssqlConnection):
         
         json_inst['values'] = tuple(json_inst['values'])
         return json_inst
-            
+
     def update_room_name(self, room_id, room_description):
         """
         修改房间名称
@@ -264,8 +264,82 @@ class DbOperator(MssqlConnection):
             temp['light']       = ''
             policy_info['policy'].append(temp)
             
-        return policy_info 
+        return policy_info
 
+    def get_policy_instance_plan(self, policy_id):
+        """
+        获取计划中的实例
+        
+        :param policy_id: 策略号
+        :rtype: 指定格式的数据
+        """
+        instance_info = []
+        sql_str = ''' select policy_instance_id, room_id, description, start_time from tb_policy_instance left join tb_policy
+                        on tb_policy_instance.policy_id = tb_policy.policy_id
+                        where tb_policy.policy_id = %d and state = %d ''' %(policy_id, POLICY_NEW)
+        instance_list = self.queryAll(sql_str)
+        for one_instance in instance_list:
+            temp_instance = {}
+            temp_instance['policyInstanceId'] = one_instance[0]
+            temp_instance['roomId'] = one_instance[1]
+            temp_instance['description'] = one_instance[2]
+            temp_instance['startAt'] = one_instance[3]
+            instance_info.append(temp_instance)
+        return instance_info
+    
+    def get_policy_instance_done(self, policy_id):
+        """
+        获取执行过的实例
+        
+        :param policy_id: 策略号
+        :rtype: 指定格式的数据
+        """
+        instance_info = []
+        sql_str = ''' select policy_instance_id, room_id, description, start_time from tb_policy_instance left join tb_policy
+                        on tb_policy_instance.policy_id = tb_policy.policy_id
+                        where tb_policy.policy_id = %d and state = %d ''' %(policy_id, POLICY_OLD)
+        instance_list = self.queryAll(sql_str)
+        for one_instance in instance_list:
+            temp_instance = {}
+            temp_instance['policyInstanceId'] = one_instance[0]
+            temp_instance['roomId'] = one_instance[1]
+            temp_instance['description'] = one_instance[2]
+            temp_instance['startAt'] = one_instance[3]
+            instance_info.append(temp_instance)
+        return instance_info
+    
+    def get_policy_2(self, policy_id):
+        """
+        获取指定策略的部分信息
+        
+        :param policy_id: 策略号
+        :rtype: 指定格式的策略信息
+        """
+        policy_info = self.get_policy(policy_id)
+        policy_info['rules'] = policy_info['policy']
+        policy_info.pop('policy')
+        
+        policy_info['now']  = -1
+        policy_info['old']  = []
+        policy_info['plan'] = []
+        
+        self.connect()
+        sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d " %(policy_id, POLICY_RUNNING)
+        now_instance_id = self.queryAll(sql_str)[0][0] 
+        policy_info['now'] = now_instance_id
+        
+        sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d " %(policy_id, POLICY_NEW)
+        plan_instance_id_list = self.queryAll(sql_str)
+        for instance in plan_instance_id_list:
+            policy_info['plan'].append(instance[0])
+            
+        sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d " %(policy_id, POLICY_OLD)
+        old_instance_id_list= self.queryAll(sql_str) 
+        for instance in old_instance_id_list:
+            policy_info['old'].append(instance[0])
+        
+        return policy_info
+    
     def current_policy(self, room_id):
         """
         获取正在执行的养殖策略
@@ -274,15 +348,20 @@ class DbOperator(MssqlConnection):
         :rtype: 指定房间的当前养殖模式的详细信息
         """
         sql_str = u'''
-                    select change_time, temperature_peak, temperature_valle, 
-                    humidity_peak, humidity_valle, co2_peak, co2_valle, light_color
-                    from vw_task
-                    where room_id = %d
+                    select change_time, 
+                            temperature_peak, temperature_valle, 
+                            humidity_peak, humidity_valle, 
+                            co2_peak, co2_valle, 
+                            reserved1_peak, reserved1_valle, light_color,
+                            tb_policy.policy_id, tb_policy.description, vw_task.policy_instance_id
+                    from vw_task left join tb_policy_instance on vw_task.policy_instance_id = tb_policy_instance.policy_instance_id
+                        left join tb_policy on tb_policy_instance.policy_id = tb_policy.policy_id
+                    where vw_task.room_id = %d
                     ''' %(room_id)
         self.connect()
         temp_list = self.queryAll(sql_str)
         self.close()
-        current_policy = []
+        rule_list = []
         for i in temp_list:
             temp = {}
             temp['changeTime']        = i[0].strftime('%Y/%m/%d %H:%M:%S')
@@ -291,37 +370,77 @@ class DbOperator(MssqlConnection):
             temp['co2']         = (i[5], i[6])
             temp['brightness']  = (i[7], i[8])
             temp['light']       = ''
-            current_policy.append(temp)
+            rule_list.append(temp)
+            
+        current_policy = {'pid': temp_list[0][10],
+                  'description' : temp_list[0][11],
+                  'rules': rule_list,
+                  }
             
         return current_policy
     
-    
-    def new_policy_instance(self, dict):
+    def new_policy(self, description, rules = ''):
         """
-        新建全新养殖模式
+        创建新策略
+        :param description: 策略描述，长度限制  <20字符
+        :rtype: 成功返回新建的策略号， 失败返回 -1
+        """
         
-        :param dict: 封装了新建策略必须的信息的字典
-        :rtype: 新建结果，code: 0 成功， -1 失败
+        if len(description) > 20:
+            log_msg = 'description is too long, please make sure the lenght less than 20'
+            print 
+            return -1
+        sql_str = u"insert into tb_policy(description) values('%s')" %(description)
+        try:
+            self.connect()
+            self.executeDML(sql_str)
+            sql_str = "select top 1 policy_id from tb_policy where description = '%s' order by policy_id desc" %(description)
+            policy_id = self.queryAll(sql_str)[0][0]
+            self.close()
+            
+            if len(rules) > 0:
+                self.create_rule(policy_id, rules)
+                
+            return policy_id
+        except KeyboardInterrupt, e:
+            print e
+            return ERR
+    
+    def new_policy_instance_2(self, policy_id, plant_name, room_desc, start_time):
         """
-        policy_id = self.create_policy(dict['description'])
-        instance_id = self.create_policy_instance(policy_id, dict['plantName'], dict['roomId'], dict['startAt'])
-        for i in range(len(dict['policy'])):
-            result = self.create_rule(policy_id, \
-                         dict['policy'][i]['date'], \
-                         dict['policy'][i]['hour'],\
-                         dict['policy'][i]['temperature'][1], \
-                         dict['policy'][i]['temperature'][0],\
-                         dict['policy'][i]['humidity'][1] ,\
-                         dict['policy'][i]['humidity'][0], \
-                         dict['policy'][i]['co2'][1], \
-                         dict['policy'][i]['co2'][0], \
-                         dict['policy'][i]['brightness'][1],\
-                         dict['policy'][i]['brightness'][0])
-        if policy_id >= 0 and instance_id >= 0 and result >= 0:
-            return {'code': 0, 'definition': 'Successful'}, policy_id
-        else:
-            #TODO: 具体出错位置
-            return {'code': -1, 'definition': 'Failed'}
+        创建新的策略实例
+        
+        :param policy_id: 策略号
+        :param plany_name: 名称
+        :param room_desc: 房间描述
+        :param start_time: 开始执行时间,格式要求： 2013-12-17 15:45:00 （格式受限于SQLServer）
+        :rtype: 成功返回新建的实例号，失败返回-1
+        """
+        self.connect()
+        try:
+            plant_id = self.plant_name2id[plant_name]
+        except KeyError:
+            self.executeDML("insert into tb_plant(plant_name) values('%s')" %(plant_name))
+            self.load_table()
+            plant_id = self.plant_name2id[plant_name]
+        try:
+            room_id = self.room_desc2id[room_desc]
+        except KeyError:
+            self.executeDML("insert into tb_room(room_description) values('%s')" %(room_desc))
+            self.load_table()
+            room_id = self.room_desc2id[room_desc]
+        try:
+            sql_str = '''insert into tb_policy_instance(policy_id, plant_id, room_id, start_time, state) 
+                        values(%d, %d, %d, '%s', %d)''' %(policy_id, plant_id, room_id, start_time, POLICY_NEW)
+            self.executeDML(sql_str)
+            instance_id = self.queryAll('''select top 1 policy_instance_id from tb_policy_instance 
+                                            where policy_id = %d order by policy_instance_id desc''' %(policy_id))[0][0]
+            self.close()
+            return instance_id
+        except Exception, e:
+            print 'in create_policy_instance: '
+            print e
+            return -1
     
     def update_policy_desc(self, policy_id, description):
         """
@@ -340,6 +459,51 @@ class DbOperator(MssqlConnection):
         self.close()
         return {'code': 0, 'definition': 'Successful'}
     
+    def update_policy(self, policy_id, rules):
+        """
+        修改指定策略
+        
+        :param policy_id: 策略号
+        :rules rules: 执行规则
+        :rtype: SUC / FAI / ERR
+        """
+        sql_str = 'delete from tb_rule where policy_id = %d' %(policy_id)
+        self.connect()
+        self.executeDML(sql_str)
+        self.close()
+        
+        if len(rules) > 0:
+            result = self.create_rule(policy_id, rules)
+    
+    def update_policy_instance(self, policy_instance_id, room_desc, plant_name, start_time):
+        """
+        更改策略实例信息
+        
+        :param policy_instance_id: 实例号
+        :param room_desc: 房间描述
+        :param plant_name: 植物名称
+        :param start_time: 开始执行时间
+        :rtype: SUC 成功， FAI 失败， ERR 异常
+        """
+        self.connect()
+        try:
+            plant_id = self.plant_name2id[plant_name]
+            room_id = self.room_desc2id[room_desc]
+        except KeyError:
+            print 'Some info provited not exist, please check it'
+            return FAI
+        
+        sql_str = '''
+            update tb_policy_instance
+            set room_id = %d,
+                plant_id = %d, 
+                start_time = '%s'
+            where policy_instance_id = %d
+            ''' %(room_id, plant_id, start_time, policy_instance_id)
+        self.executeDML(sql_str)
+        self.close()
+        return SUC
+    
     def delete_policy(self, policy_id):
         """
         删除指定policy
@@ -353,7 +517,14 @@ class DbOperator(MssqlConnection):
         self.executeDML(u'delete from tb_policy where policy_id = %d' %(policy_id))
         self.close()
         return {'code': 0, 'definition': 'Successful'}
-        
+    
+    def delete_policy_instance(self, policy_instance_id):
+        sql_str = 'delete from tb_policy_instance where policy_instance_id = %d' %(policy_instance_id)
+        self.connect()
+        self.executeDML(sql_str)
+        self.close()
+        return SUC
+    
 if __name__ == '__main__':
     host = db_conn_info['HOST']
     db_name = db_conn_info['DATABASE']
@@ -362,61 +533,38 @@ if __name__ == '__main__':
     temp = DbOperator(host, db_name, user, password)
     temp.test_connection()
     
-#     for i in range(10):
-#         temp.insert_data(2, datetime.now().strftime('%Y-%m-%d'), 12.0, 12.1, 12.2, 12.3)
-#         print "now is instance: %d" %i
-     
-#     print temp.get_room_info(1) 
-#     print temp.get_all_room()
-#      
-    print temp.get_time_reange_data(1, '2014/03/31 09:56:01.000', '2014/04/04 09:56:31.000')
-#     print temp.all_policy_info()
-#     print temp.get_policy(1)
-#     print temp.current_policy(1)
-     
-#     print temp.update_plant_info(1, 'strowberry')
-#     print temp.update_room_name(2, 'left_second')
-#     print temp.update_policy_desc(1, 'second_test')
-#      
-#     dict = {
-#             "roomId" : 1,
-#             "description": 'forth',
-#             "plantName": 'stowberry',
-#             "policy": [{
-#                             "date" : 1,
-#                             "hour" : 12,
-#                             "temperature": (10, 20),
-#                             "humidity":  (20, 30),
-#                             "co2":  (30, 40),
-#                             "lightColor": "white",
-#                         },
-#                        {
-#                             "date" : 1,
-#                             "hour" : 12,
-#                             "temperature": (11, 21),
-#                             "humidity":  (21, 31),
-#                             "co2":  (31, 41),
-#                             "lightColor": "blue",
-#                         },
-#                        {
-#                             "date" : 1,
-#                             "hour" : 12,
-#                             "temperature": (12, 22),
-#                             "humidity":  (22, 32),
-#                             "co2":  (32, 42),
-#                             "lightColor": "yellow",
-#                         },],
-#             "startAt":"2014/01/03 16:07",
-#             }
-#  
-#     print temp.new_policy_instance(dict)
-#     print temp.delete_policy(14)
-#       
-#     
-#     temp.transfor_absolute_time('2000-1-1 1:1:0')
-
-#     print temp.get_latest_data(1)
-#     
-#     print temp.certain_sensor_time_range_data(129, '2014/03/31 09:56:01.000', '2014/03/31 09:56:31.000')
+    print temp.current_policy(1)
+    print temp.get_policy_2(56) #check
     
-#     print temp.get_all_room()
+    rules = [
+             {'co2': (12.0, 12.0), 
+              'temperature': (12.0, 12.0), 
+              'hour': 1, 
+              'brightness': (12.0, 12.0), 
+              'light': '', 
+              'humidity': (12.0, 12.0), 
+              'date': 0
+              }, 
+             {'co2': (12.0, 12.0), 
+              'temperature': (12.0, 12.0), 
+              'hour': 1, 
+              'brightness': (12.0, 12.0), 
+              'light': '', 
+              'humidity': (12.0, 12.0), 
+              'date': 0
+              }, 
+            {'co2': (12.0, 12.0), 
+             'temperature': (12.0, 12.0), 
+             'hour': 1, 
+             'brightness': (12.0, 12.0), 
+             'light': '', 
+             'humidity': (12.0, 12.0), 
+             'date': 0}
+        ]
+#     temp.new_policy(u'新策略', rules)    # check
+#     temp.update_policy(124, rules)     # check
+#     temp.new_policy_instance_2(124, 'mongou', 'left_second', '2014-04-15 12:12:00.000') #check 
+#     temp.update_policy_instance(106, 'left_first', 'xianggu', '2014-04-16 12:12:00.000') #check
+#     temp.delete_policy_instance(106) #check
+#     print temp.get_policy_instance_plan(56) # check
+#     print temp.get_policy_instance_done(56) # check

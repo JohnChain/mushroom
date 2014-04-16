@@ -28,10 +28,8 @@ class DjangoFrameMain():
             self.client.last_time = datetime.now()
             self.client.mylock.release()
 
-            # 拆包得到json数据部分
-            json_frame = servant.unpack(version, body)
             # 解析数据
-            json_inst = servant.parse(json_frame)
+            json_inst = servant.parse(body)
             # 带入计算公式计算
             result = servant.dispatch(json_inst, self.client.handler)
             

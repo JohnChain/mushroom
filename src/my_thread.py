@@ -25,7 +25,6 @@ class MyThread(threading.Thread):
 
         :rtype: 尚无返回
         """
-
         self.func(self.stop_Event, self.param, )
 
     def join(self):
@@ -38,6 +37,3 @@ class MyThread(threading.Thread):
         except AttributeError, e:
             log_msg = str(e)
             log_handler.error(e)
-
-
-
