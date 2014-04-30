@@ -41,18 +41,6 @@ class DjangoFrameSolution():
         """
         handler.send(frame)
         return len(frame)
-
-    def unpack(self, version, body):
-        """
-        拆包，判断帧头尾正确性，及完成校验任务
-        
-        :param origin_frame: 待解析的原始数据包
-        :rtype: 成功，待反序列化的数据部分，否则返回空字符
-        """
-#         if origin_frame[:8] != D_HEAD:
-#             print 'wrone head'
-#             return ''
-        return body
     
     def parse(self, json_frame):
         """

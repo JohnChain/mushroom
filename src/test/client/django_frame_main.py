@@ -21,11 +21,7 @@ class DjangoFrameMain():
         version, body = servant.receive(self.client)
         if body != '':
 
-            # 拆包得到json数据部分
-            json_frame = servant.unpack(version, body)
             # 解析数据 
-            json_inst = servant.parse(json_frame)
-            # 带入计算公式计算
-            result = servant.dispatch(json_inst, self.client)
-            
+            json_inst = servant.parse(body)
+            return json_inst
         

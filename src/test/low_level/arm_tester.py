@@ -19,7 +19,6 @@ def main():
 #     arm_tester.send(push_sensor_data())
     while 1:
         receiver.main_receivor()
-        
 
 if __name__ == '__main__':
     main()

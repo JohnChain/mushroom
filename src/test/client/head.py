@@ -13,6 +13,18 @@ from threading import Event, Timer
 from signal import signal, SIGINT
 from binascii import a2b_hex, b2a_hex
 
+# 开
+ON = 1
+# 关
+OFF = 0
+# 成功
+SUC = 0
+# 失败
+FAI = -1
+# 异常
+ERR = -2
+
+
 # 环境限定范围，由单独的线程负责不断刷新，键为房间号，值为一个队列，长度始终为2，
 # 其中第一个值为包含了当前使用的环境限定范围的元组，第二个值下一次刷新时间
 threshold = {}
@@ -47,8 +59,8 @@ SELECT_TIMEOUT = 2
 #: 僵尸套接字连接判断时间
 SOCKET_TIMEOUT = 10
 #: 对 ARM 提供链接服务的地址及端口
-# ARM_SERVER_ADDR = ('127.0.0.1', 10001)
-ARM_SERVER_ADDR = ('10.18.50.66', 9000)
+ARM_SERVER_ADDR = ('127.0.0.1', 9000)
+# ARM_SERVER_ADDR = ('10.18.50.66', 9000)
 #: 对 Django 提供链接服务的地址及端口 
 # DJANGO_SERVER_ADDR = ('127.0.0.1', 10002)
 DJANGO_SERVER_ADDR = ('10.18.50.66', 9001)

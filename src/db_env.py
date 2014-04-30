@@ -8,7 +8,7 @@ light_color = {
        3 : 'yellow', 
        }
 
-class PolicyInstance:    
+class PolicyInstance:
     """
     策略实例类型
     """

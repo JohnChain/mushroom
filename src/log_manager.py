@@ -256,31 +256,35 @@ class Logger():
         #设置文件日志
         work_fh = logging.FileHandler(work_path)
         work_fh.setFormatter(fmt)
+        work_fh.setLevel(logging.INFO)
         if log_conf['WORK'] == ON:
-            work_fh.setLevel(logging.INFO)
+            self.enable_work()
         else:
-            work_fh.setLevel(logging.WARNING)
+            self.disable_work()
             
         communication_fh = logging.FileHandler(communication_path)
         communication_fh.setFormatter(fmt)
+        communication_fh.setLevel(logging.INFO)
         if log_conf['COMMUNICATION'] == ON:
-            communication_fh.setLevel(logging.INFO)
+            self.enable_communication()
         else:
-            communication_fh.setLevel(logging.WARNING)
+            self.disable_communication()
 
         error_fh = logging.FileHandler(error_path)
         error_fh.setFormatter(fmt)
+        error_fh.setLevel(logging.ERROR)
         if log_conf['ERROR'] == ON:
-            error_fh.setLevel(logging.ERROR)
+            self.enable_error()
         else:
-            error_fh.setLevel(logging.CRITICAL)
+            self.disable_error()
 
         debug_fh = logging.FileHandler(debug_path)
         debug_fh.setFormatter(fmt)
+        debug_fh.setLevel(logging.DEBUG)
         if log_conf['DEBUG'] == ON:
-            debug_fh.setLevel(logging.DEBUG)
+            self.enable_debug()
         else:
-            debug_fh.setLevel(logging.INFO)
+            self.disable_debug()
             
         self.work_log.addHandler(sh)
         self.communication_log.addHandler(sh)

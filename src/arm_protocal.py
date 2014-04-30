@@ -330,81 +330,88 @@ def deal_read_sensor_data_response(proto_inst, fileno):
 
     log_msg = 'From ARM READ_SENSOR_DATA_RESPONSE -- '
     log_handler.communication(log_msg)
-
+    
     room_id = sensor_data.room_id
     sense_time = sensor_data.time.timestamp
-    print 'sensor_time = %s' %sense_time
+    log_msg = 'sensor_time = %s' %sense_time
+    log_handler.debug(log_msg)
+    
     data = {}
-    
-    db_inst = MssqlConnection()
-    instance_id = db_inst.insert_instance(room_id, sense_time)
-    
-    if instance_id == FAI:
+    try:
+        db_inst = MssqlConnection()
+        instance_id = db_inst.insert_instance(room_id, sense_time)
+        
+        if instance_id == FAI:
+            return FAI
+        
+        db_inst.connect()
+        for one_data in sensor_data.sensor:
+            data[one_data.type] = one_data
+            
+            sql_str = 'insert into tb_data(instance_id, sensor_id, data) values(%d, %d, %f)' %(instance_id, one_data.id, one_data.value)
+            db_inst.executeDML(sql_str)
+        db_inst.close()
+    except Exception, e:
+        log_msg = 'Something wrong with the database when try transforing absolute time !!!'
+        log_handler.error(log_msg)
         return FAI
-    
-    db_inst.connect()
-#     print 'db_handler = %s, cursor = %s' %(str(db_inst.handler), str(db_inst.cursor))
-#     db_inst.test_connection()
-    for one_data in sensor_data.sensor:
-        data[one_data.type] = one_data
-        
-        sql_str = 'insert into tb_data(instance_id, sensor_id, data) values(%d, %d, %f)' %(instance_id, one_data.id, one_data.value)
-        db_inst.executeDML(sql_str)
-    db_inst.close()
-        
     #TODO: 这里有个问题，每新建一个数据库实例时，会从数据库中load几张表，因为一下的insert_data函数用到了这些表，是否可以有更好的改进方法
 #     db_inst.insert_data(room_id, sense_time, \
 #                         data[TEMP].value, data[HUMI].value, data[CO2].value, data[LIGHT].value,\
 #                         data[TEMP].id, data[HUMI].id, data[CO2].id, data[LIGHT].id )
     
+    #TODO: 根据当前环境限制，发送响应控制器控制命令
+    log_msg = ''
     if len(threshold) > 0 :
-        if  data[TEMP].value < threshold[room_id][0][2]:
-            log_msg = "it is too cold, please worm me up!"
-            #TODO:
-            update_controller_state(1, ON, fileno)
-        elif data[TEMP].value > threshold[room_id][0][3]:
-            log_msg = 'it is too hot, please cool me down!'
-            update_controller_state(2, OFF, fileno)
-        else:
-            log_msg = 'Hemperature is OK'
-        log_handler.communication(log_msg)
-
-        if  data[HUMI].value < threshold[room_id][0][4]:
-            log_msg = 'it is too dry, please give me some water!'
-            update_controller_state(3, ON, fileno)
-        elif data[HUMI].value > threshold[room_id][0][5]:
-            log_msg = 'it is too humid, please dry me up!'
-            update_controller_state(4, OFF, fileno)
-        else:
-            log_msg = 'Humidity is OK'
-        log_handler.communication(log_msg)
-
-        if  data[CO2].value < threshold[room_id][0][6]:
-            log_msg = 'it is co2-less, please give me some co2!'
-            update_controller_state(5, ON, fileno)
-        elif data[CO2].value > threshold[room_id][0][7]:
-            log_msg = 'it is co2-ful, please give me some fresh air!'
-            update_controller_state(6, OFF, fileno)
-        else:
-            log_msg = 'CO2 is OK'
-        log_handler.communication(log_msg)
-
-        if data[LIGHT].value < threshold[room_id][0][9]:
-            log_msg = 'it is too bright, please dark me down !'
-            update_controller_state(7, ON, fileno)
-        elif data[LIGHT].value > threshold[room_id][0][10]:
-            log_msg = 'it is too dark, please turn lights on !'
-            update_controller_state(8, OFF, fileno)
-        else:
-            log_msg = 'brightness is OK'
-        
-        log_handler.communication(log_msg)
-    else:
-        print 'thresholds not ready yet'
+        try:
+            if  data[TEMP].value < threshold[room_id][0][2]:
+                log_msg = "it is too cold, please worm me up!"
+                update_controller_state(1, ON, fileno)
+            elif data[TEMP].value > threshold[room_id][0][3]:
+                log_msg = 'it is too hot, please cool me down!'
+                update_controller_state(2, OFF, fileno)
+            else:
+                log_msg = 'Hemperature is OK'
+            log_handler.communication(log_msg)
+            
+            if  data[HUMI].value < threshold[room_id][0][4]:
+                log_msg = 'it is too dry, please give me some water!'
+                update_controller_state(3, ON, fileno)
+            elif data[HUMI].value > threshold[room_id][0][5]:
+                log_msg = 'it is too humid, please dry me up!'
+                update_controller_state(4, OFF, fileno)
+            else:
+                log_msg = 'Humidity is OK'
+            log_handler.communication(log_msg)
     
+            if  data[CO2].value < threshold[room_id][0][6]:
+                log_msg = 'it is co2-less, please give me some co2!'
+                update_controller_state(5, ON, fileno)
+            elif data[CO2].value > threshold[room_id][0][7]:
+                log_msg = 'it is co2-ful, please give me some fresh air!'
+                update_controller_state(6, OFF, fileno)
+            else:
+                log_msg = 'CO2 is OK'
+            log_handler.communication(log_msg)
+    
+            if data[LIGHT].value < threshold[room_id][0][9]:
+                log_msg = 'it is too bright, please dark me down !'
+                update_controller_state(7, ON, fileno)
+            elif data[LIGHT].value > threshold[room_id][0][10]:
+                log_msg = 'it is too dark, please turn lights on !'
+                update_controller_state(8, OFF, fileno)
+            else:
+                log_msg = 'brightness is OK'
+        except KeyError:
+            pass
+        except IndexError:
+            log_msg = 'No policy in Room: %d' %room_id
+    else:
+        log_msg = 'thresholds not ready yet'
+    log_handler.work(log_msg)
 def deal_sensor_data_push(proto_inst, fileno):
     #TODO: 同 deal_read_sensor_data_response
-    pass 
+    pass
 
 # ===================================================================================
 
@@ -425,25 +432,34 @@ def init_sync(proto_inst, fileno):
 
     log_msg = 'From ARM INIT -- '
     log_handler.communication(log_msg)
-
-    db_inst = MssqlConnection()
     
-    for one_room in conf_init.roomconf:
-        room_id = one_room.id
-        for one_sensor in one_room.sensor:
-            sensor_id = one_sensor.id
-            sensor_type = sensor_type_dict[one_sensor.type]
+    try:
+        db_inst = MssqlConnection()
+        
+        for one_room in conf_init.roomconf:
+            room_id = one_room.id
+            if not db_inst.room_id2desc.has_key(room_id):
+                db_inst.insert_room(room_id, 'Room_' + str(room_id))
+                
+            for one_sensor in one_room.sensor:
+                sensor_id = one_sensor.id
+                sensor_type = sensor_type_dict[one_sensor.type]
+                if db_inst.sensor_id2name.has_key(sensor_id):
+                    pass
+                else:
+                    db_inst.insert_sensor(sensor_id, sensor_type, room_id)
+    #             room_dict['sensor'].append(sensor_id)
             
-            db_inst.insert_sensor(sensor_id, sensor_type, room_id)  
-            room_dict['sensor'].append(sensor_id)
-            
-        for one_controller in one_room.controller:
-            controller_id = one_controller.controller_id
-            controller_type = controller_type_dict[one_controller.type]
-            
-            db_inst.insert_controller(controller_id, controller_type, room_id)
-            room_dict['controller'].append(controller_id)
-            
+            for one_controller in one_room.controller:
+                controller_id = one_controller.controller_id
+                controller_type = controller_type_dict[one_controller.type]
+                
+                db_inst.insert_controller(controller_id, controller_type, room_id)
+    #             room_dict['controller'].append(controller_id)
+    except pyodbc.IntegrityError:
+        pass
+    except Exception, e:
+        log_handler.error(str(e))
     for one_config in conf_init.config:
         key = one_config.key
         val = one_config.val
@@ -482,19 +498,20 @@ def deal_reboot_response(proto_inst, fileno):
     response_code = ResponseCode()
     response_code.ParseFromString(proto_inst['data'])
     header_inst = proto_inst['header_inst']
+    log_msg = ''
     if header_inst.source == BIRTH_TYPE_AUTO:
         if response_code.code == OK:
-            print "update time succeed"
+            log_msg = "reboot successfully"
         else:
-            print "update time failed, error log : %s" %response_code.log
+            log_msg = "reboot failed, error log : %s" %response_code.log
     else:
         if response_code.code == OK:
-            print "update time succeed"
+            log_msg = "reboot successfully"
         else:
-            print "update time failed, error log : %s" %response_code.log
-          
+            log_msg = "reboot failed, error log : %s" %response_code.log
+    log_handler.communication(log_msg)
 # ===================================================================================
-arm_protocal1 = {
+arm_protocal = {
     READ_TIME : deal_read_time,
     UPDATE_TIME : update_time,
     UPDATE_TIME_RESPONSE : deal_update_time_response,
@@ -513,14 +530,7 @@ arm_protocal1 = {
     
     READ_SENSOR_DATA : read_sensor_data,
     READ_SENSOR_DATA_RESPONSE : deal_read_sensor_data_response,
-#     SENSOR_DATA_PUSH: deal_sensor_data_push,
     SENSOR_DATA_PUSH: deal_read_sensor_data_response,
     
     INIT : init_sync,
 }
-
-
-body_dict = {
-    1: arm_protocal1,
-    }
-    

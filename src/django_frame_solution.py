@@ -80,6 +80,9 @@ class DjangoFrameSolution():
         elif json_inst['uri'] == "policy/now/update":
             if json_inst['type'] == 'request':
                 return policy_instance_updated(json_inst, client_handler)
+        elif json_inst['uri'] == "log/viewer":
+            if json_inst['type'] == 'request':
+                return log_view(json_inst, client_handler)
         else:
             log_msg = 'Unknow uri'
             log_handler.communication(log_msg)

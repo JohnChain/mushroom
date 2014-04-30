@@ -26,7 +26,7 @@ log_viewer = {
     "uri" : "log/viewer", 
     "type": "request", 
     "data": {
-        "type": 'work',  #["error"/ "communication"/"debug"/"work"],
+        "type": 'work',  #["error"/ "communication"/"debug"/"work"], 如果为'all'则为查看所有种类
     }
 }
 

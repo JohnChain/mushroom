@@ -23,7 +23,7 @@ try:
            HUMI : 'humidity',
            CO2  : 'co2',
         }
-    
+
     controller_type_dict = {
            XUNHUAN_FAN  : 'xunhuan_fan',
            JINFENG_FAN  : 'jinfeng_fan',
@@ -39,12 +39,12 @@ except Exception:
     pass
 
 sys_config_dict = {
-        'TIME_SYNC_CYCLE' : 50,
+    'TIME_SYNC_CYCLE' : 50,
     }
 
 room_dict = {
-        'sensor': [],
-        'controller': [],
+    'sensor': [],
+    'controller': [],
     }
 
 # 开
@@ -58,10 +58,10 @@ FAI = -1
 # 异常
 ERR = -2
 
-# 全局线程队列    
+# 全局线程队列
 thread_dict = {}
 THREAD_TASK     = 'task_deliver'
-THREAD_ARM      = 'arm_server' 
+THREAD_ARM      = 'arm_server'
 THREAD_DJANGO   = 'django_server'
 THREAD_POLICY   = 'threshold_loader'
 
@@ -88,15 +88,37 @@ TASK_WAITING        = 1
 #:任务完成状态
 TASK_FINISHED       = 2
 
+#==============数据库模块配置=============#
+try:
+    import pyodbc
+except Exception:
+    print "pyodbc not installed, please install it first"
+    sys.exit()
+
+#: 数据库连接参数
+db_conn_info = {
+#      "HOST"      : "localhost\\sqlserver2008",
+#     "USER"      : "sa",
+#     "PASSWORD"  : "cslg123456,./",
+    "HOST"      : "127.0.0.1",
+    "USER"      : "wsngump",
+    "PASSWORD"  : "wsngump",
+    "DATABASE"  : "mushroom",
+}
+
+POLICY_NEW      = 2
+POLICY_RUNNING  = 1
+POLICY_OLD      = 0
+
 #============套接字队列模块配置=============#
 #: select 超时时间
 SELECT_TIMEOUT      = 2
 #: 僵尸套接字连接判断时间
 SOCKET_TIMEOUT      = 10
 #: 对 ARM 提供链接服务的地址及端口
-ARM_SERVER_ADDR     = ('10.18.50.66', 9000)
+ARM_SERVER_ADDR     = ['10.18.50.66', 9000]
 #: 对 Django 提供链接服务的地址及端口 
-DJANGO_SERVER_ADDR  = ('10.18.50.66', 9001)
+DJANGO_SERVER_ADDR  = ['10.18.50.66', 9001]
 
 #: 方向，本系统中包括 ARM 和 Django
 BIRTH_TYPE_MANUAL   = 0
@@ -107,25 +129,6 @@ arm_client_dic      = {}
 django_client_list  = []
 django_client_dic   = {}
 
-#==============数据库模块配置=============#
-try:
-    import pyodbc
-except Exception:
-    print "pyodbc not installed, please install it first"
-    sys.exit()
-    
-#: 数据库连接参数
-db_conn_info = {
-    "HOST"      : "10.18.50.66",
-#     "HOST"      : "127.0.0.1",
-    "USER"      : "wsngump",
-    "PASSWORD"  : "wsngump",
-    "DATABASE"  : "mushroom",
-}
-
-POLICY_NEW      = 2
-POLICY_RUNNING  = 1
-POLICY_OLD      = 0
 
 #=============日志模块配置===============#
 #: 日志配置参数
@@ -178,3 +181,9 @@ D_VERSION = 1
 D_version_byte = 1
 #: 业务层消息头占字节数
 D_lenght_byte = 4
+
+#============数据存储模块配置===============#
+# 缓存的待存储数据
+senser_data_list = []
+
+DATA_STORING_CYCLE = 10

@@ -119,7 +119,6 @@ class SocketList:
                             if result == SUC :
                                 log_msg = "[ %s ] One frame solved from fileno %d " %(self.thread_name, sk_node.fileno())
                                 log_handler.work(log_msg)
-                                print "=========================================== \n"
 
                             elif result == ERR :
                                 log_msg = "[ %s ] One connection Timeout from fileno %d " %(self.thread_name, sk_node.fileno())

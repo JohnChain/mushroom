@@ -16,7 +16,7 @@ class ArmFrameMain():
         """
         连接实例主处理入口，收取数据， 解析数据， 处理数据
         
-        :rtype: 如果接受数据不为空， 返回 1， 如果查过判断僵死时间，返回 -1， 否则返回 0
+        :rtype: 成功返回SUC， 失败返回 FAI，如果查过判断僵死时间，返回 ERR
         """     
         servant = ArmFrameSolution()
         # 收数据
@@ -51,5 +51,3 @@ class ArmFrameMain():
                 return ERR
             else:
                 return FAI
-        
-    

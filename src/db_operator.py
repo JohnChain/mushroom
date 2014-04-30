@@ -5,9 +5,8 @@ from db_base import MssqlConnection
 from db_env import *
 
 class DbOperator(MssqlConnection):
-    def __init__(self, serverIp = db_conn_info['HOST'], dbName = db_conn_info['DATABASE'], \
-                 uid = db_conn_info['USER'], pwd = db_conn_info['PASSWORD']):
-        MssqlConnection.__init__(self, serverIp, dbName, uid, pwd)
+    def __init__(self, ):
+        MssqlConnection.__init__(self)
     
     def get_latest_data(self, room_id):
         """
@@ -122,6 +121,7 @@ class DbOperator(MssqlConnection):
         temp['position'] = data[0][2]
         
         data_list = []
+        print 'length = %d' %len(data)
         for i in data:
             data_list.append((i[3].strftime('%Y/%m/%d %H:%M:%S'), i[4]))
         temp['values'] = tuple(data_list)
@@ -231,7 +231,7 @@ class DbOperator(MssqlConnection):
         获取指定养殖模式的全部信息
         
         :param policy_id: 策略号
-        :rtype: 指定养殖模式的详细信息
+        :rtype: 指定养殖模式的详细信息,失败返回FAI
         """
         sql_str = u'''
                 select description, interval_date, hours, 
@@ -265,8 +265,107 @@ class DbOperator(MssqlConnection):
             policy_info['policy'].append(temp)
             
         return policy_info
-
-    def get_policy_instance_plan(self, policy_id):
+    
+    def get_policy_instance_now(self, policy_id = None, room_id = None):
+        """
+        获取中正在执行的实例
+        
+        :param policy_id:
+        :param room_id: 
+        :rtype: 指定养殖模式的详细信息,失败返回FAI
+        """
+        if policy_id != None:
+            
+            sql_str = u'''
+                    select change_time,
+                        temperature_peak, temperature_valle, 
+                        humidity_peak, humidity_valle,
+                        co2_peak, co2_valle,
+                        reserved1_peak, reserved1_valle, 
+                        light_color, policy_id, room_id
+                    from vw_task
+                    where vw_task.policy_id = %d
+                    order by change_time
+                    ''' %(policy_id)
+            self.connect()
+            temp_list = self.queryAll(sql_str)
+            self.close()
+            
+            the_end = {}
+            for i in temp_list:                
+                policy_id           = i[10]
+                room_id             = i[11]
+                if the_end.has_key(room_id):
+                    pass
+                else:
+                    the_end[room_id] = {'roomId' : room_id,
+                                    'roomDesc' : self.room_id2desc[room_id],
+                                    'policy_id' : policy_id,
+                                    'now' : '',
+                                    'rules' : []
+                                   }
+            for i in temp_list:
+                temp = {}
+                temp['changeTime']  = i[0].strftime('%Y/%m/%d %H:%M:%S')
+                temp['temperature'] = (i[1], i[2])
+                temp['humidity']    = (i[3], i[4])
+                temp['co2']         = (i[5], i[6])
+                temp['brightness']  = (i[7], i[8])
+                temp['light']       = ''
+                room_id             = i[11]
+                the_end[room_id]['rules'].append(temp)
+                
+                if i[0] <= datetime.now():
+                    the_end[room_id]['now'] = temp['changeTime']
+                    
+            end_list = [] 
+            for key in the_end.keys():
+                end_list.append(the_end[key])
+            return end_list
+        
+        elif room_id != None:
+            sql_str = u'''
+                    select change_time,
+                        temperature_peak, temperature_valle, 
+                        humidity_peak, humidity_valle,
+                        co2_peak, co2_valle,
+                        reserved1_peak, reserved1_valle, 
+                        light_color, policy_id, room_id
+                    from vw_task
+                    where vw_task.room_id = %d
+                    order by change_time
+                    ''' %(room_id)
+            self.connect()
+            temp_list = self.queryAll(sql_str)
+            self.close()
+            
+            rule_list = []
+            current_instance = {'roomId' : room_id,
+                                'roomDesc' : self.room_id2desc[room_id],
+                                'now': '',
+                                'rules': rule_list,
+                              }
+            current_rule_time = ''
+            policy_id = -1
+            for i in temp_list:
+                temp = {}
+                temp['changeTime']  = i[0].strftime('%Y/%m/%d %H:%M:%S')
+                temp['temperature'] = (i[1], i[2])
+                temp['humidity']    = (i[3], i[4])
+                temp['co2']         = (i[5], i[6])
+                temp['brightness']  = (i[7], i[8])
+                temp['light']       = ''
+                policy_id           = i[10]
+                rule_list.append(temp)
+                if i[0] <= datetime.now():
+                    current_rule_time = temp['changeTime']
+            current_instance['policyId'] = policy_id
+            current_instance['now'] = current_rule_time
+            return [current_instance]
+        else:
+            return FAI
+    
+    def get_policy_instance_plan_list(self, policy_id):
         """
         获取计划中的实例
         
@@ -274,20 +373,21 @@ class DbOperator(MssqlConnection):
         :rtype: 指定格式的数据
         """
         instance_info = []
-        sql_str = ''' select policy_instance_id, room_id, description, start_time from tb_policy_instance left join tb_policy
-                        on tb_policy_instance.policy_id = tb_policy.policy_id
-                        where tb_policy.policy_id = %d and state = %d ''' %(policy_id, POLICY_NEW)
+        sql_str = ''' select policy_instance_id, room_id, start_time, plant_id from tb_policy_instance 
+                        where policy_id = %d and state = %d ''' %(policy_id, POLICY_NEW)
+        self.connect()
         instance_list = self.queryAll(sql_str)
+        self.close()
         for one_instance in instance_list:
             temp_instance = {}
             temp_instance['policyInstanceId'] = one_instance[0]
-            temp_instance['roomId'] = one_instance[1]
-            temp_instance['description'] = one_instance[2]
-            temp_instance['startAt'] = one_instance[3]
+            temp_instance['roomDesc'] = self.room_id2desc[one_instance[1]]
+            temp_instance['startAt'] = one_instance[2]
+            temp_instance['plantName'] = self.plant_id2name[one_instance[3]]
             instance_info.append(temp_instance)
         return instance_info
     
-    def get_policy_instance_done(self, policy_id):
+    def get_policy_instance_done_list(self, policy_id):
         """
         获取执行过的实例
         
@@ -295,16 +395,17 @@ class DbOperator(MssqlConnection):
         :rtype: 指定格式的数据
         """
         instance_info = []
-        sql_str = ''' select policy_instance_id, room_id, description, start_time from tb_policy_instance left join tb_policy
-                        on tb_policy_instance.policy_id = tb_policy.policy_id
-                        where tb_policy.policy_id = %d and state = %d ''' %(policy_id, POLICY_OLD)
+        sql_str = ''' select policy_instance_id, room_id, start_time, plant_id from tb_policy_instance 
+                        where policy_id = %d and state = %d ''' %(policy_id, POLICY_OLD)
+        self.connect()
         instance_list = self.queryAll(sql_str)
+        self.close()
         for one_instance in instance_list:
             temp_instance = {}
             temp_instance['policyInstanceId'] = one_instance[0]
-            temp_instance['roomId'] = one_instance[1]
-            temp_instance['description'] = one_instance[2]
-            temp_instance['startAt'] = one_instance[3]
+            temp_instance['roomDesc'] = self.room_id2desc[one_instance[1]]
+            temp_instance['startAt'] = one_instance[2]
+            temp_instance['plantName'] = self.plant_id2name[one_instance[3]]
             instance_info.append(temp_instance)
         return instance_info
     
@@ -313,32 +414,42 @@ class DbOperator(MssqlConnection):
         获取指定策略的部分信息
         
         :param policy_id: 策略号
-        :rtype: 指定格式的策略信息
+        :rtype: 指定格式的策略信息,失败返回 FAI
         """
         policy_info = self.get_policy(policy_id)
         policy_info['rules'] = policy_info['policy']
         policy_info.pop('policy')
         
-        policy_info['now']  = -1
+        policy_info['now']  = []
         policy_info['old']  = []
         policy_info['plan'] = []
         
         self.connect()
-        sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d " %(policy_id, POLICY_RUNNING)
-        now_instance_id = self.queryAll(sql_str)[0][0] 
-        policy_info['now'] = now_instance_id
+        try:
+            sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d" %(policy_id, POLICY_RUNNING)
         
-        sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d " %(policy_id, POLICY_NEW)
-        plan_instance_id_list = self.queryAll(sql_str)
-        for instance in plan_instance_id_list:
-            policy_info['plan'].append(instance[0])
-            
-        sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d " %(policy_id, POLICY_OLD)
-        old_instance_id_list= self.queryAll(sql_str) 
-        for instance in old_instance_id_list:
-            policy_info['old'].append(instance[0])
+            now_instance_list = self.queryAll(sql_str)
+            for one_instance in now_instance_list:
+                policy_info['now'].append(one_instance[0])
+        except IndexError:
+            pass
+                
+        try: 
+            sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d " %(policy_id, POLICY_NEW)
+            plan_instance_id_list = self.queryAll(sql_str)
+            for instance in plan_instance_id_list:
+                policy_info['plan'].append(instance[0])
+        except IndexError:
+            pass
         
-        return policy_info
+        try: 
+            sql_str = " select policy_instance_id from tb_policy_instance where policy_id = %d and state = %d " %(policy_id, POLICY_OLD)
+            old_instance_id_list= self.queryAll(sql_str) 
+            for instance in old_instance_id_list:
+                policy_info['old'].append(instance[0])
+            return policy_info
+        except IndexError:
+            return FAI
     
     def current_policy(self, room_id):
         """
@@ -414,7 +525,7 @@ class DbOperator(MssqlConnection):
         :param plany_name: 名称
         :param room_desc: 房间描述
         :param start_time: 开始执行时间,格式要求： 2013-12-17 15:45:00 （格式受限于SQLServer）
-        :rtype: 成功返回新建的实例号，失败返回-1
+        :rtype: 成功返回新建的实例号，失败返回 -1， 异常返回 -2
         """
         self.connect()
         try:
@@ -426,9 +537,10 @@ class DbOperator(MssqlConnection):
         try:
             room_id = self.room_desc2id[room_desc]
         except KeyError:
-            self.executeDML("insert into tb_room(room_description) values('%s')" %(room_desc))
-            self.load_table()
-            room_id = self.room_desc2id[room_desc]
+            return FAI
+#             self.executeDML("insert into tb_room(room_description) values('%s')" %(room_desc))
+#             self.load_table()
+#             room_id = self.room_desc2id[room_desc]
         try:
             sql_str = '''insert into tb_policy_instance(policy_id, plant_id, room_id, start_time, state) 
                         values(%d, %d, %d, '%s', %d)''' %(policy_id, plant_id, room_id, start_time, POLICY_NEW)
@@ -440,7 +552,7 @@ class DbOperator(MssqlConnection):
         except Exception, e:
             print 'in create_policy_instance: '
             print e
-            return -1
+            return ERR
     
     def update_policy_desc(self, policy_id, description):
         """
@@ -526,15 +638,11 @@ class DbOperator(MssqlConnection):
         return SUC
     
 if __name__ == '__main__':
-    host = db_conn_info['HOST']
-    db_name = db_conn_info['DATABASE']
-    user = db_conn_info['USER']
-    password = db_conn_info['PASSWORD']
-    temp = DbOperator(host, db_name, user, password)
+    temp = DbOperator()
     temp.test_connection()
     
-    print temp.current_policy(1)
-    print temp.get_policy_2(56) #check
+#     print temp.current_policy(3)
+    print temp.get_policy_2(142) #check
     
     rules = [
              {'co2': (12.0, 12.0), 
@@ -566,5 +674,45 @@ if __name__ == '__main__':
 #     temp.new_policy_instance_2(124, 'mongou', 'left_second', '2014-04-15 12:12:00.000') #check 
 #     temp.update_policy_instance(106, 'left_first', 'xianggu', '2014-04-16 12:12:00.000') #check
 #     temp.delete_policy_instance(106) #check
-#     print temp.get_policy_instance_plan(56) # check
-#     print temp.get_policy_instance_done(56) # check
+#     print temp.get_policy_instance_now(142, None) #check
+#     print temp.get_policy_instance_plan_list(142) # check
+#     print temp.get_policy_instance_done_list(53) # check
+
+    len(temp.get_time_reange_data(1,'2014-04-28 1:1:1', '2014-04-28 20:10:00'))
+    print 'search end'
+[
+  {'roomDesc': u'left_second', 
+   'now': '2014/04/22 15:12:00', 
+   'roomId': 2, 
+   'policy_id': 142,
+   'rules': [
+            {'changeTime': '2014/04/22 11:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)},
+            {'changeTime': '2014/04/22 12:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+            {'changeTime': '2014/04/22 14:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+            {'changeTime': '2014/04/22 15:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+            {'changeTime': '2014/04/22 17:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+            {'changeTime': '2014/04/22 18:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+            {'changeTime': '2014/04/22 20:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+            {'changeTime': '2014/04/22 21:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+            {'changeTime': '2014/04/22 23:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}
+        ], 
+   
+    }, 
+    {   
+        'roomDesc': u'one month', 
+        'now': '2014/04/22 15:12:00', 
+        'roomId': 3, 
+        'policy_id': 142,
+        'rules': [
+             {'changeTime': '2014/04/22 11:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+             {'changeTime': '2014/04/22 12:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+             {'changeTime': '2014/04/22 14:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+             {'changeTime': '2014/04/22 15:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+             {'changeTime': '2014/04/22 17:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+             {'changeTime': '2014/04/22 18:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+             {'changeTime': '2014/04/22 20:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+             {'changeTime': '2014/04/22 21:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}, 
+             {'changeTime': '2014/04/22 23:12:00', 'co2': (200.0, 100.0), 'temperature': (200.0, 100.0), 'brightness': (200.0, 100.0), 'light': '', 'humidity': (200.0, 100.0)}
+             ], 
+     }
+]

@@ -37,10 +37,10 @@ class TaskList():
     
     def add(self, one_task):
         """
-        怎加任务
+        增加任务
         
         :param one_task: 待插入的任务，类型为 Task 类
-        :rtype: NULL
+        :rtype: 成功SUC，失败FAI
         """
         if task_condition.acquire():
             self.task_list[one_task.id] = one_task
@@ -48,6 +48,11 @@ class TaskList():
             task_condition.release()
             log_msg = 'One task added'
             log_handler.debug(log_msg)
+            return SUC
+        else:
+            log_msg = 'Adding one task failed, task_id： %d' %(one_task.id)
+            log_handler.error(log_msg)
+            return FAI
     
     def remove(self, task_id):
         """
