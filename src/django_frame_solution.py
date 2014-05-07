@@ -61,10 +61,10 @@ class DjangoFrameSolution():
 
     def dispatch(self, json_inst, client_handler):
         """
-        解析器
+        分发器
         
         :param frame: 待解析的数据包
-        :rtype: 【待定】
+        :rtype: 成功返回SUC， 失败返回 FAI
         """
         if json_inst['uri'] == "device/controller":
             if json_inst['type'] == 'request':
@@ -86,5 +86,4 @@ class DjangoFrameSolution():
         else:
             log_msg = 'Unknow uri'
             log_handler.communication(log_msg)
-
-            return 0
+            return FAI

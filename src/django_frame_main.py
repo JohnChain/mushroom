@@ -15,11 +15,8 @@ class DjangoFrameMain():
         """
         连接实例主处理入口，收取数据
 
-        :rtype: 如果接受数据不为空， 返回 1， 如果超过判断僵死时间，返回 -1， 否则返回 0
+        :rtype: 成功返回SUC， 失败返回 FAI，如果查过判断僵死时间，返回 ERR
         """
-        #log_msg = 'In DjangoFrameMain, later will server one client'
-        #log_manager.add_work_log(log_msg, sys._getframe().f_code.co_name)
-
         result = FAI
         servant = DjangoFrameSolution()
         version, body = servant.receive(self.client.handler)

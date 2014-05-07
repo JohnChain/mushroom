@@ -13,6 +13,7 @@ from time import sleep
 from datetime import datetime, timedelta
 from threading import Event, Timer
 from signal import signal, SIGINT
+from collections import deque
 from binascii import a2b_hex, b2a_hex
 
 try:
@@ -60,18 +61,18 @@ ERR = -2
 
 # 全局线程队列
 thread_dict = {}
-THREAD_TASK     = 'task_deliver'
-THREAD_ARM      = 'arm_server'
-THREAD_DJANGO   = 'django_server'
-THREAD_POLICY   = 'threshold_loader'
-
+THREAD_TASK             = 'task_deliver'
+THREAD_ARM              = 'arm_server'
+THREAD_DJANGO           = 'django_server'
+THREAD_POLICY           = 'threshold_loader'
+THREAD_SENSOR_DATA_STORAGE     = 'sensor_data_storage' 
 
 #===========执行策略相关=================#
 # 环境限定范围，由单独的线程负责不断刷新，键为房间号，值为一个队列，长度始终为2.
 # 其中第一个值为包含了当前使用的环境限定范围的元组，第二个值下一次刷新时间
 threshold = {}
 #:环境限制条件载入周期
-THRESHOLD_LOAD_CYCLE = 10
+THRESHOLD_LOAD_CYCLE = 5
 
 #============任务队列模块配置==============#
 #: 任务超时时长（s）
@@ -109,6 +110,8 @@ db_conn_info = {
 POLICY_NEW      = 2
 POLICY_RUNNING  = 1
 POLICY_OLD      = 0
+
+db_reconnect_cycle = [10, 30, 60, 120]
 
 #============套接字队列模块配置=============#
 #: select 超时时间
@@ -183,7 +186,9 @@ D_version_byte = 1
 D_lenght_byte = 4
 
 #============数据存储模块配置===============#
+MAX_BUFFER_LEN  = 1000000
 # 缓存的待存储数据
-senser_data_list = []
+sensor_data_queue = deque(maxlen = MAX_BUFFER_LEN)
 
 DATA_STORING_CYCLE = 10
+

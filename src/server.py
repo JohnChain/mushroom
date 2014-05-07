@@ -7,6 +7,7 @@ from arm_frame_main import ArmFrameMain
 from django_frame_main import DjangoFrameMain
 from task_deliver import TaskDeliver
 from load_threshold import load_threshold
+from sensor_data_storage import sensor_data_storage
 from env_init import read_config
 
 main_event = Event()
@@ -19,6 +20,12 @@ def handler(signal, frame):
     main_event.set()
     for thread_name in thread_dict.keys():
         thread_dict[thread_name].join()
+
+    thread_dict[THREAD_DJANGO].join()
+    thread_dict[THREAD_ARM].join() 
+    thread_dict[THREAD_SENSOR_DATA_STORAGE].join()
+    thread_dict[THREAD_TASK].join()
+    thread_dict[THREAD_POLICY].join()
 
     log_msg = 'System Shutdown'
     log_handler.work(log_msg)
@@ -58,12 +65,15 @@ def main():
     django_server = MyThread(THREAD_DJANGO, temp_django.manage_list, ('', ))
     django_server.start()
 
-    global thread_dict
+    storage_mudule = MyThread(THREAD_SENSOR_DATA_STORAGE, sensor_data_storage, ('', ))
+    storage_mudule.start()
+    
     thread_dict[THREAD_TASK]    = task_deliver
     thread_dict[THREAD_ARM]     = ram_server
     thread_dict[THREAD_DJANGO]  = django_server
     thread_dict[THREAD_POLICY]  = threshold_loader
-
+    thread_dict[THREAD_SENSOR_DATA_STORAGE] = storage_mudule
+    
     signal(SIGINT, handler)
     try:
         while not main_event.isSet():

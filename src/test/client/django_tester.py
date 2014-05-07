@@ -20,8 +20,13 @@ def main():
 #     django_tester.send(device_viewer_frame)
 #     dj_reciver.main_receivor()
     
-    django_tester.send(instance_updated_frame)
-
-    django_tester.close()
+#     django_tester.send(instance_updated_frame)
+    try:
+        while 1:
+            dj_reciver.main_receivor()
+    except Exception:
+        pass
+    finally:
+        django_tester.close()
 if __name__ == '__main__':
     main()

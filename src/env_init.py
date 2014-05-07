@@ -32,21 +32,21 @@ def read_config():
         log_file['WORK']            = config_inst.get('Log', 'work_path')
 
         if config_inst.getint('Log', 'error_open') == 1:
-            log_conf['ERROR']         = ON
+            log_handler.enable_error()
         else:
-            log_conf['ERROR']         = OFF
+            log_handler.disable_error()
         if config_inst.getint('Log', 'communication_open') == 1:
-            log_conf['COMMUNICATION'] = ON
+            log_handler.enable_communication()
         else:
-            log_conf['COMMUNICATION'] = OFF
-        if config_inst.getint('Log', 'DEBUG_open') == 1:
-            log_conf['DEBUG']         = ON
+            log_handler.disable_communication()
+        if config_inst.getint('Log', 'debug_open') == 1:
+            log_handler.enable_debug()
         else:
-            log_conf['DEBUG']         = OFF
-        if config_inst.getint('Log', 'WORK_open') == 1:
-            log_conf['WORK']          = ON
+            log_handler.disable_debug()
+        if config_inst.getint('Log', 'work_open') == 1:
+            log_handler.enable_work()
         else:
-            log_conf['WORK']          = OFF
+            log_handler.disable_work()
 
         ####################################################
         MAX_TASK_ID = config_inst.getint('Task', 'max_session_id')

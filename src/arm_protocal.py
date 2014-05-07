@@ -326,6 +326,8 @@ def deal_read_sensor_data_response(proto_inst, fileno):
     sensor_data = SensorData()
     sensor_data.ParseFromString(proto_inst['data'])
     
+    sensor_data_queue.append(sensor_data)
+    
     message_header = proto_inst['header_inst']
 
     log_msg = 'From ARM READ_SENSOR_DATA_RESPONSE -- '
@@ -336,29 +338,54 @@ def deal_read_sensor_data_response(proto_inst, fileno):
     log_msg = 'sensor_time = %s' %sense_time
     log_handler.debug(log_msg)
     
+    json_inst = {
+         "uri"  : "SensorData",
+         "type" : "post",
+         "data" : {
+               "roomId" : room_id,
+               "time"   : sense_time,
+               "sensors": {
+                    "temperature": -1,
+                    "co2": -1,
+                    "humidity": -1,
+                    "brightness": -1,
+                   },
+               },
+         }
+    
     data = {}
-    try:
-        db_inst = MssqlConnection()
-        instance_id = db_inst.insert_instance(room_id, sense_time)
-        
-        if instance_id == FAI:
-            return FAI
-        
-        db_inst.connect()
-        for one_data in sensor_data.sensor:
-            data[one_data.type] = one_data
+    log_msg = 'bef pack sensors'
+    log_handler.debug(log_msg)
+    
+    for one_data in sensor_data.sensor:
+        data[one_data.type] = one_data
+        if one_data.type == TEMP:
+            json_inst["data"]["sensors"]["temperature"] = one_data.value
+        elif one_data.type == HUMI:
+            json_inst["data"]["sensors"]["humidity"] = one_data.value
+        elif one_data.type == CO2:
+            json_inst["data"]["sensors"]["co2"] = one_data.value
+        elif one_data.type == LIGHT:
+            json_inst["data"]["sensors"]["brightness"] = one_data.value
+        else:
+            log_msg = "unknown sensor data type"
+            log_handler.error(log_msg)
             
-            sql_str = 'insert into tb_data(instance_id, sensor_id, data) values(%d, %d, %f)' %(instance_id, one_data.id, one_data.value)
-            db_inst.executeDML(sql_str)
-        db_inst.close()
-    except Exception, e:
-        log_msg = 'Something wrong with the database when try transforing absolute time !!!'
-        log_handler.error(log_msg)
-        return FAI
-    #TODO: 这里有个问题，每新建一个数据库实例时，会从数据库中load几张表，因为一下的insert_data函数用到了这些表，是否可以有更好的改进方法
-#     db_inst.insert_data(room_id, sense_time, \
-#                         data[TEMP].value, data[HUMI].value, data[CO2].value, data[LIGHT].value,\
-#                         data[TEMP].id, data[HUMI].id, data[CO2].id, data[LIGHT].id )
+    head = D_HEAD
+    version = D_VERSION 
+
+    log_msg = 'To django push sensor data -- head: %s, version: %s, body: %s' %(head, version, json.dumps(json_inst))
+    log_handler.communication(log_msg)
+
+    message_to_dj = gene_django_frame(head, version, json_inst)
+    for dj_handler in django_client_list[1:]:
+        try:
+            dj_handler.handler.send(message_to_dj)
+            log_msg = "Send sensor data to upper layer done: " 
+            log_handler.debug(log_msg)
+        except Exception:
+            log_msg = 'Push sensor data error !'
+            log_handler.error(log_msg)
     
     #TODO: 根据当前环境限制，发送响应控制器控制命令
     log_msg = ''
@@ -511,13 +538,13 @@ def deal_reboot_response(proto_inst, fileno):
             log_msg = "reboot failed, error log : %s" %response_code.log
     log_handler.communication(log_msg)
 # ===================================================================================
+# 注册业务处理函数
 arm_protocal = {
     READ_TIME : deal_read_time,
     UPDATE_TIME : update_time,
     UPDATE_TIME_RESPONSE : deal_update_time_response,
 
     READ_CONF : deal_read_conf,
-#     READ_CONF_RESPONSE : deal_read_conf_response,
     UPDATE_CONF : update_conf,
     UPDATE_CONF_RESPONSE : deal_update_conf_response,
     REBOOT: reboot,

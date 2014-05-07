@@ -13,6 +13,7 @@ encoding//src/head.py=utf-8
 encoding//src/load_threshold.py=utf-8
 encoding//src/log_manager.py=utf-8
 encoding//src/my_thread.py=utf-8
+encoding//src/sensor_data_storage.py=utf-8
 encoding//src/server.py=utf-8
 encoding//src/socket_list.py=utf-8
 encoding//src/task_deliver.py=utf-8

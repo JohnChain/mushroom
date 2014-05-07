@@ -123,7 +123,6 @@ class MssqlConnection:
 #             print log_msg
             return ERR
 
-
     def load_table(self):
         """
         将数据库中部分表加载到内存
@@ -167,17 +166,20 @@ class MssqlConnection:
         for i in query_list:
             self.controller_dict[i[1]] = {i[2]: i[0]}
         self.close()
-
-    def test_connection(self):
+        
+    @classmethod
+    def test_connection(cls):
         try:
-            self.connect()
-            query_list = self.queryAll("SELECT 'SQLServer Connection Successful'")
-            print query_list
+            handler = pyodbc.connect(driver='{SQL Server}', server=db_conn_info['HOST'], \
+                                          database=db_conn_info['DATABASE'], uid=db_conn_info['USER'], pwd=db_conn_info['PASSWORD'], ansi = True)#, unicode_results = True)
+            cursor = handler.cursor()
+            cursor.close()
+            handler.close()
+            return SUC
         except Exception, e:
-            print e
-            return str(e)
-        finally:
-            self.close()
+            log_msg = 'DB test connection failed'
+            log_handler.error(log_msg)
+            return FAI
 
     def transfor_absolute_time(self, state = POLICY_RUNNING):
         """

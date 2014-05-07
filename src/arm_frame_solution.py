@@ -114,7 +114,7 @@ class ArmFrameSolution():
         解析器
         
         :param frame: 待解析的数据包
-        :rtype: 【待定】
+        :rtype: 成功返回SUC， 失败返回 FAI
         """
         try:
             message_id = proto_inst['header_inst'].message_id
@@ -129,6 +129,8 @@ class ArmFrameSolution():
             log_msg = 'Drop illeagle message_id = %d' %message_id
             log_handler.error(log_msg)
         except Exception, e:
+            log_msg = "here in despatch"
+            log_handler.debug(log_msg)
             log_msg = str(e)
             log_handler.error(log_msg)
         finally:

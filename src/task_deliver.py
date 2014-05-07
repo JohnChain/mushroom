@@ -59,7 +59,7 @@ class TaskDeliver():
                             if gap > TASK_TIMEOUT:
                                 global_task_list.remove(key)
                             continue
-                #else:
+#                 else:
                 task_condition.wait(TASK_WAIT_CIRCLE)
             task_condition.release()
         else:

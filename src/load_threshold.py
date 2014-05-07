@@ -13,6 +13,8 @@ def load_threshold(stopEvent, param, ):
     :rtype:
     """
     def load(room_id, threshold):
+        db_inst = MssqlConnection()
+        
         str_time = threshold[room_id][1][1].strftime("%Y-%m-%d %H:%M:%S")
         temp = db_inst.get_threshold(room_id, str_time)
         log_msg = str(temp)
@@ -39,7 +41,6 @@ def load_threshold(stopEvent, param, ):
         else:
             # 当前房间无要新策略，均为就策略实例
             # 将该roomID所对应的policy_instance的状态设置为 OLD
-            # 将该roomID从room2policy_instance字典中删除
             db_inst.update_policy_instance_state(room_id, POLICY_OLD)
             if db_inst.transfor_room_absolute_time(room_id) == FAI:
                 # 此时后两种情况：1. 无新策略待执行； 2. 有新策略，但规则为空
@@ -49,7 +50,7 @@ def load_threshold(stopEvent, param, ):
         log_handler.debug('[ROOM: %d] current threshold is : %s ' %(room_id, str(threshold)))
 
     def timer_work():
-        for room_id in db_inst.room_dict.keys():
+        for room_id in room_dict.keys():
             try:
                 if not threshold.has_key(room_id):
                     # 系统启动后首次载入环境限制
@@ -61,27 +62,34 @@ def load_threshold(stopEvent, param, ):
                 log_msg = 'Something wrong with the database when try loading threshold !!!'
                 log_handler.error(log_msg)
                 continue
+    
     log_msg = 'Thread Load Threshold is Ready ...'
     log_handler.work(log_msg)
 
     try:
         db_inst = MssqlConnection()
+        room_dict = db_inst.room_id2desc
         db_inst.transfor_absolute_time()
     except Exception:
         log_msg = 'Something wrong with the database when try transforing absolute time !!!'
         log_handler.error(log_msg)
         return ERR
 
+    pointer = 0
     timer = Timer(THRESHOLD_LOAD_CYCLE, timer_work)
-    timer.setName(THREAD_POLICY)
-    timer.start()
     while not stopEvent.isSet():
-        if timer.isAlive():
-            sleep(0.1)
-        else:
+        dbIsReady = MssqlConnection.test_connection()
+        if dbIsReady == SUC:
             timer = Timer(THRESHOLD_LOAD_CYCLE, timer_work)
             timer.setName(THREAD_POLICY)
             timer.start()
+            while timer.isAlive():
+                sleep(0.1)
+        else:
+            log_msg = 'Something wrong with the database, system will reconnect in %d seconds !!!' %db_reconnect_cycle[pointer]
+            log_handler.error(log_msg)
+            sleep(db_reconnect_cycle[pointer])
+            pointer = (pointer + 1) % len(db_reconnect_cycle)
     timer.cancel()
 
     log_msg = 'Load Threshold Thread shutdown and cleaned! '

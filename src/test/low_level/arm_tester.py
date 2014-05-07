@@ -15,10 +15,11 @@ def main():
     receiver = ArmFrameMain(arm_tester)
     arm_tester.send(init())
     arm_tester.send(read_time())
-#     receiver.main_receivor()
+    receiver.main_receivor()
 #     arm_tester.send(push_sensor_data())
     while 1:
-        receiver.main_receivor()
+        arm_tester.send(push_sensor_data())
+        sleep(2)
 
 if __name__ == '__main__':
     main()
